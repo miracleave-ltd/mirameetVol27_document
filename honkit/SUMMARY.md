@@ -6,4 +6,4 @@
 * [3.](Section_3.md)
 * [4.](Section_4.md)
 * [5.](Section_5.md)
-* [6.AWS CodeBuildでビルドを実行しみよう！](Section_2.md)
+* [6.AWS CodeBuildでビルドを実行しみよう！](Section_6.md)
