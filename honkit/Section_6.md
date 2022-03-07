@@ -2,12 +2,13 @@
 
 ## 本セクションで行うこと
 - CodeBuildの解説
-- 実際にCodeBuildでビルドを実行する
+- ビルドプロジェクトを作成する
+- CodeBuildでビルドを実行する
 
 ## AWS CodeBuildの解説
  AWSで提供されているクラウドサーバー上で、プロジェクトのテストとビルドができるサービス。
- DockerやRuby、Go, pythonなどに対応。
- また、他のサービス（AWS CodeCommitやCodeDeploy）と組み合わせることも可能。
+ Rubyの他にJava、Go, pythonなどに対応。
+ また、他のサービス（AWS CodeCommitやCodeDeploy）と組み合わせて利用することも可能。
  
  ### AWS CodeBuildの仕組み
 
@@ -32,25 +33,29 @@
 version: 0.2　   ・・・buildspecのバージョンを指定（最新の0.2を使用）
 
 phases:
-  install:   ・・・インストールの段階で実行するコマンドを設定する。ビルド環境で使用するパッケージをインストールする場合に使用。
+  install:   ・・・インストールの段階で実行するコマンドを設定する。主にビルド環境で使用するパッケージのインストールなどに使用。
     runtime-versions:
-      docker: 19   ・・・ 今回はdockerを使用しているのでdockerのバージョン19を指定。
+      docker: 19   ・・・ 今回はdockerを使用しているのでdockerのバージョン19を指定（※１）。
     commands: 
-  pre_build:   ・・・・ビルドの前に実行するコマンドを設定する。npmパッケージのインストールやgemのインストールする場合に使用。
-    commands:
+  pre_build:   ・・・・ビルドの前に実行するコマンドを設定する。主にnpmパッケージのインストールやgemのインストールなどに使用。
       - echo PRE_BUILD Start
       - docker-compose -f docker_compose_test.yml build   ・・・　dockerをビルドする。
-  build:   ・・・ビルド時に実行するコマンドを設定する。テストを行う。
+  build:   ・・・ビルド時に実行するコマンドを設定する。主にテストを行う。
     commands:
       - echo BUILD start
       - docker-compose -f docker_compose_test.yml up -d
       - docker-compose -f docker_compose_test.yml run app bundle exec rake spec   ・・・テストを実行する。
  ```
 
-## CodeBuildでAWS上にあるテスト用DBに接続してビルドを実行する
+※１[バージョンはこちらを参照](https://github.com/aws/aws-codebuild-docker-images/blob/master/ubuntu/standard/4.0/runtimes.yml)
+
+
+## ビルドプロジェクトを設定する
 
 実際の現場では、テスト環境用のDBが用意されていることがあると思います。Codebuildは、VPC内に設置することも可能です。  
-同じVPC内にRDSを設置することでCodeBuildからRDSに接続してテストを実行することができます。今回はテスト用のRDSに接続してビルドを実行したいと思います。
+同じVPC内にRDSを設置することでCodeBuildからRDSに接続してテストを実行することができます。  
+**今回は実際の現場で使えそうな利用方法を試したいので、テスト用のRDSに接続してビルドを実行したいと思います。**
+
 
 ### 今回使用するAWSのアーキテクトの確認
 
