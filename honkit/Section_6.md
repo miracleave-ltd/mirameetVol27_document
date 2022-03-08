@@ -29,23 +29,22 @@
 ### buildspec.yml
   ビルド環境で実行するコマンドなどを記載するyaml形式のファイル。  
 
-```
-version: 0.2　   ・・・buildspecのバージョンを指定（最新の0.2を使用）
-
-phases:
-  install:   ・・・インストールの段階で実行するコマンドを設定する。主にビルド環境で使用するパッケージのインストールなどに使用。
-    runtime-versions:
-      docker: 19   ・・・ 今回はdockerを使用しているのでdockerのバージョン19を指定（※１）。
-    commands: 
-  pre_build:   ・・・・ビルドの前に実行するコマンドを設定する。主にnpmパッケージのインストールやgemのインストールなどに使用。
-      - echo PRE_BUILD Start
-      - docker-compose -f docker_compose_test.yml build   ・・・　dockerをビルドする。
-  build:   ・・・ビルド時に実行するコマンドを設定する。主にテストを行う。
-    commands:
-      - echo BUILD start
-      - docker-compose -f docker_compose_test.yml up -d
-      - docker-compose -f docker_compose_test.yml run app bundle exec rake spec   ・・・テストを実行する。
-```
+  ```
+  version: 0.2   ・・・buildspecのバージョンを指定（最新の0.2を使用）
+  phases:
+    install:   ・・・インストールの段階で実行するコマンドを設定する。主にビルド環境で使用するパッケージのインストールなどに使用。
+      runtime-versions:
+        docker: 19   ・・・ 今回はdockerを使用しているのでdockerのバージョン19を指定（※１）。
+      commands: 
+    pre_build:   ・・・・ビルドの前に実行するコマンドを設定する。主にnpmパッケージのインストールやgemのインストールなどに使用。
+        - echo PRE_BUILD Start
+        - docker-compose -f docker_compose_test.yml build   ・・・　dockerをビルドする。
+    build:   ・・・ビルド時に実行するコマンドを設定する。主にテストを行う。
+      commands:
+        - echo BUILD start
+        - docker-compose -f docker_compose_test.yml up -d
+        - docker-compose -f docker_compose_test.yml run app bundle exec rake spec   ・・・テストを実行する。
+  ```
 
 ※１[バージョンはこちらを参照](https://github.com/aws/aws-codebuild-docker-images/blob/master/ubuntu/standard/4.0/runtimes.yml)
 
