@@ -276,27 +276,26 @@
 <li>ビルド環境で、ソースコードをダウンロード後、buildspec.ymlで設定したコマンドを実行してソースのコンパイル・テスト・ビルドを行う。</li>
 <li><p>ビルド出力がある場合は、S3にデプロイ可能なアーティファクトをアップロードされる。</p>
 <p>１〜３のログは、AWS CloudWatch Logsに送信される。</p>
-<h3 id="buildspec_yml">2.3. buildspec.yml</h3>
-<p>ビルド環境で実行するコマンドなどを記載するyaml形式のファイル。</p>
-<p>```
-version: 0.2　   ・・・buildspecのバージョンを指定（最新の0.2を使用）</p>
 </li>
 </ol>
-<p>phases:
+<h3 id="buildspec_yml">2.3. buildspec.yml</h3>
+<p>  ビルド環境で実行するコマンドなどを記載するyaml形式のファイル。  </p>
+<pre><code>version: 0.2　   ・・・buildspecのバージョンを指定（最新の0.2を使用）
+
+phases:
   install:   ・・・インストールの段階で実行するコマンドを設定する。主にビルド環境で使用するパッケージのインストールなどに使用。
     runtime-versions:
       docker: 19   ・・・ 今回はdockerを使用しているのでdockerのバージョン19を指定（※１）。
     commands: 
-  pre_build:   ・・・・ビルドの前に実行するコマンドを設定する。主にnpmパッケージのインストールやgemのインストールなどに使用。</p>
-<pre><code>  - echo PRE_BUILD Start
-  - docker-compose -f docker_compose_test.yml build   ・・・　dockerをビルドする。
-</code></pre><p>  build:   ・・・ビルド時に実行するコマンドを設定する。主にテストを行う。
-    commands:</p>
-<pre><code>  - echo BUILD start
-  - docker-compose -f docker_compose_test.yml up -d
-  - docker-compose -f docker_compose_test.yml run app bundle exec rake spec   ・・・テストを実行する。
-</code></pre><p> ```</p>
-<p>※１<a href="https://github.com/aws/aws-codebuild-docker-images/blob/master/ubuntu/standard/4.0/runtimes.yml" target="_blank">バージョンはこちらを参照</a></p>
+  pre_build:   ・・・・ビルドの前に実行するコマンドを設定する。主にnpmパッケージのインストールやgemのインストールなどに使用。
+      - echo PRE_BUILD Start
+      - docker-compose -f docker_compose_test.yml build   ・・・　dockerをビルドする。
+  build:   ・・・ビルド時に実行するコマンドを設定する。主にテストを行う。
+    commands:
+      - echo BUILD start
+      - docker-compose -f docker_compose_test.yml up -d
+      - docker-compose -f docker_compose_test.yml run app bundle exec rake spec   ・・・テストを実行する。
+</code></pre><p>※１<a href="https://github.com/aws/aws-codebuild-docker-images/blob/master/ubuntu/standard/4.0/runtimes.yml" target="_blank">バージョンはこちらを参照</a></p>
 <h2 id="ビルドプロジェクトを設定する">3. ビルドプロジェクトを設定する</h2>
 <p>実際の現場では、テスト環境用のDBが用意されていることがあると思います。Codebuildは、VPC内に設置することも可能です。<br>同じVPC内にRDSを設置することでCodeBuildからRDSに接続してテストを実行することができます。<br><strong>今回は実際の現場で使えそうな利用方法として、テスト用のRDSに接続してビルドを実行したいと思います。</strong></p>
 <h3 id="今回使用するAWSのアーキテクトの確認">3.1. 今回使用するAWSのアーキテクトの確認</h3>
@@ -391,7 +390,7 @@ version: 0.2　   ・・・buildspecのバージョンを指定（最新の0.2�
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"next":{"title":"7.まままああああああとめ","level":"1.8","depth":1,"path":"Section_7.md","ref":"Section_7.md","articles":[]},"previous":{"title":"5.統合テスト","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_6.md","mtime":"2022-03-08T12:37:00.722Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-08T12:37:11.549Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"next":{"title":"7.まままああああああとめ","level":"1.8","depth":1,"path":"Section_7.md","ref":"Section_7.md","articles":[]},"previous":{"title":"5.統合テスト","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_6.md","mtime":"2022-03-08T12:56:54.539Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-08T13:05:53.437Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
