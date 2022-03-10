@@ -14,11 +14,24 @@
 私が経験した現場では、いろいろなテストの形がありました。  
 動作確認程度のテスト、エクセルでエビデンスのキャプチャをとるレガシーなテスト、テストコードを利用したテスト、、、、、など現場によって様々です。
 
-今回はRuby on Railsでの自動テストについて話していきます。
 
-**RSpecは、Ruby on Railsのテストフレームワークになります。**  
-RSpecを使うことで、テストコードによる自動テストができるようになります。
+[公式ドキュメント](https://relishapp.com/rspec/)よりRSpecについて下記のように説明されています。
+```
+RSpec is a Behaviour-Driven Development tool for Ruby programmers. BDD is an approach
+to software development that combines Test-Driven Development, Domain Driven Design,
+and Acceptance Test-Driven Planning. RSpec helps you do the TDD part of that equation,
+focusing on the documentation and design aspects of TDD.
+```
 
+要約すると、、、、
+- RSpecは、BDDツールである。  
+BDD・・・振る舞い駆動開発のこと。TDD（テスト駆動開発）から派生した開発手法。BDDでは実装前に要求される振る舞い(≒要件)をテストに書き出してから実装する。
+- 
+
+
+
+**RSpecは、テストフレームワークになります。**  
+Railsプロジェクトで、RSpecでテストを行うには「rspec-rails」というライブラリ（gem）のインストールが必要になります。
 
 
 
