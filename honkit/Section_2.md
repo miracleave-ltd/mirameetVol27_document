@@ -29,7 +29,6 @@ focusing on the documentation and design aspects of TDD.
 BDD・・・振る舞い駆動開発(Behaviour-Driven Development)のこと。TDD（テスト駆動開発）から派生した開発手法。BDDでは実装前に要求される振る舞い(≒仕様)をテストに書き出してから実装し、  
 また、要求される振る舞いは自然言語(英語など)に近い形で表現されます。
 
-**RSpecは、テストフレームワークになります。**  
 Railsプロジェクトで、RSpecでテストを行うには「rspec-rails」というライブラリ（gem）のインストールが必要になります。
 
 
