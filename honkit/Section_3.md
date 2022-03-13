@@ -57,45 +57,46 @@ rails g rspec:model user
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
+  # 有効な属性の場合のテスト
   it "nickname, email, password, password_confirmationがあれば有効であること"
+  
+  # アソシエーションのテスト
   it "postモデルとのアソシエーションが有効であること"
   it "commentモデルとのアソシエーションが有効であること"
+  
+  # 各属性の有効・無効の場合のテスト
   it "nicknameがnilの場合、無効であること"
   it "nicknameが空文字の場合、無効であること"
   it "nicknameが10文字以内の場合、有効であること"
   it "nicknameが11文字以上の場合、無効であること"
-
-
-  describe 'email' do
-    it { is_expected.to validate_presence_of :email }
-    it { is_expected.to validate_uniqueness_of(:email).case_insensitive }
-    it 'emailの形式ではない場合、無効な状態であること' do
-      user = build(:user, email: 'example_no_email')
-      user.valid?
-      expect(user.errors[:email]).to include("は不正な値です") #invalid
-    end
-
-    it 'emailは全角文字を使用する場合、無効な状態であること' do
-      user = build(:user, email: 'ｅｘａｐｌｅ@gmail.com')
-      user.valid?
-      expect(user.errors[:email]).to include("は不正な値です") #invalid
-    end
-  end
-
-  describe 'password' do
-    it { is_expected.to validate_presence_of :password }
-    it { is_expected.to validate_length_of(:password).is_at_least(6).is_at_most(128) }
-    it { is_expected.to validate_presence_of :password_confirmation }
-
-    it 'passwordとpassword_confirmationが不一致の場合、無効な状態であること' do
-      user = build(:user, password: 'password', password_confirmation: 'password_confirmation')
-      user.valid?
-      expect(user.errors[:password_confirmation]).to include("とパスワードの入力が一致しません") #confirmation
-    end
-  end
+  it "emailがnilの場合、無効であること"
+  it "emailが空文字の場合、無効であること"
+  it "emailが既に保存されている場合、無効であること"
+  it "emailがemailの形式ではない場合、無効な状態であること"
+  it "emailは全角文字を使用する場合、無効な状態であること" do
+  it "passwordがnilの場合、無効であること"
+  it "passwordが空文字の場合、無効であること"
+  it "passwordが5文字以内の場合、無効であること"
+  it "passwordが6文字以上の場合、有効であること"
+  it "passwordが128文字以内の場合、有効であること"
+  it "passwordが129文字以上の場合、無効であること"
+  it "password_confirmationがnilの場合、無効であること"
+  it "password_confirmationが空文字の場合、無効であること"
+  it "passwordとpassword_confirmationが不一致の場合、無効であること"
 end
 
 ```
+
+#### describe
+期待する結果をまとめる。上記では `descrive User`としていて、これがUserモデルのテストであると明示している。
+
+#### it
+実際のテストを実行するexampleを定義している。基本的にexample一つにつき一つの結果を期待する。
+- exampleは明示的に記載する。省略することもできるが、可読性が落ちるため、基本的には記述する。
+- exampleの説明は動詞で始まる。例えば、`nicknameがnilの場合、無効であること`を英語に置き換えると`is Invalid if nickname is nil`となる。
+
+
+
 exampleを書く it '~' do end
 実装
 テストデータの作成方法(Factorybot、Fackerの導入)
