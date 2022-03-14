@@ -29,6 +29,7 @@ rails g rspec:install
 ```
 
 下記のようにディレクトリ・ファイルが作成されれば完了です。
+
 create  .rspec
 create  spec
 create  spec/spec_helper.rb
@@ -40,11 +41,15 @@ create  spec/rails_helper.rb
 ## 2. Modelの単体テストの実装
 
 ### モデルスペックの観点
+モデルスペックでは以下のような観点で実装をします。
+
 - 有効な属性で初期化した場合、モデルが有効であることを検証する。
 - 無効な属性で初期化した場合、モデルが有効ではないことを検証する。
 - クラスメソッドとインスタンスメソッドが定義されている場合は期待通りに動作すること。
 
 ### ファイルの作成
+まずはUserモデルを例にファイル作成をしていきます。
+
 `ターミナル`
 ```ruby
 rails g rspec:model user
@@ -53,6 +58,9 @@ rails g rspec:model user
 `spec/models/user_spec.rb`というファイルが作成されていればOKです。
 
 ### Userモデルの要件
+ではモデルスペックの観点を参考に、Userモデルでのテスト要件をまとめます。
+先ほど作成した`user_spec.rb`ファイルに必要なテストを以下のように記載しました。
+
 ```ruby
 require 'rails_helper'
 
@@ -88,16 +96,24 @@ end
 
 ```
 
+このようにテストを書き始める際はまずはどのような観点が必要なのか洗い出してexampleとしてまとめると実装がしやすいです。
+
+上記の文法を説明していきます。
+
 #### describe
-期待する結果をまとめる。上記では `descrive User`としていて、これがUserモデルのテストであると明示している。
+期待する結果をまとめます。上記では `describe User`としていて、これがUserモデルのテストであると明示しています。
+これはネストすることが可能で、`describe`の中に`describe`を実装することもできます。
 
 #### it
-実際のテストを実行するexampleを定義している。基本的にexample一つにつき一つの結果を期待する。
-- exampleは明示的に記載する。省略することもできるが、可読性が落ちるため、基本的には記述する。
-- exampleの説明は動詞で始まる。例えば、`nicknameがnilの場合、無効であること`を英語に置き換えると`is invalid if nickname is nil`となる。
+実際のテストを実行するexampleを定義しています。
+- 基本的にexample一つにつき一つの結果を期待しています。
+- exampleは明示的に記載します。省略することもできますが、可読性が落ちるため、基本的には記述することが望ましいです。
+- exampleの説明は動詞で始まります。例えば、`nicknameがnilの場合、無効であること`を英語に置き換えると`is invalid if nickname is nil`となり、動詞から始まっていることがわかります。
 
 
 ### テストを実装する
+では、実際にテストを実装していきます。まずは、「有効な属性の場合のテスト」から実装しましょう。
+
 #### 有効な属性の場合のテスト
 
 ```ruby
@@ -118,9 +134,10 @@ end
 
 ```
 
-`it ~ do end`でexampleのブロックを作成する。今回は有効な属性のテストのため、exampleとして`it "nickname, email, password, password_confirmationがあれば有効であること" do end`とする。
+まず、`it ~ do end`でexampleのブロックを作成ます。今回は有効な属性のテストのため、exampleとして`it "nickname, email, password, password_confirmationがあれば有効であること" do end`としています。こうすることで、このテストが何をテストするのか非常にわかりやすくなります。
 
-すべての属性が有効である場合のテストのため、全ての属性が有効であるインスタンスを作成する。
+続いて、`it`の中身を見てみましょう。最初にUserモデルのインスタンスを作成しています。
+今回は、すべての属性が有効である場合のテストのため、全ての属性が有効であるインスタンスを作成します。
 ```ruby
 user = User.new(
   nickname: 'Takashi',
@@ -130,20 +147,22 @@ user = User.new(
 )
 ```
 
-そして、本当にこのインスタンスが有効であるかどうかをチェックする。
+最後に、本当にこのインスタンスが有効であるかどうかをチェックします。
+
 ```ruby
 expect(user).to be_valid
 ```
 
-このテストでは`be_valid`というマッチャを使用して`user`が有効であるかどうかをテストしている。
-下記コマンドでテストを実行してみる。
+上記が実際のテストの実行構文です。
+まずはこのテストが通るかどうか実行してみます。
 
 `ターミナル`
 ```ruby
 bundle exec rspec spec/models/user_spec.rb
 ```
 
-下記のようにターミナルに出力されればテスト成功
+下記のようにターミナルに出力されればテスト成功です！
+
 ```ruby
 User
   nickname, email, password, password_confirmationがあれば有効であること
@@ -152,23 +171,30 @@ Finished in 0.29163 seconds (files took 6.71 seconds to load)
 1 example, 0 failures
 ```
 
+では、`expect(user).to be_valid`が実際に何をやっているか一つずつ見ていきましょう。
+
 #### expectメソッドとマッチャ
-テストには`expect`メソッドを使用する。expectとは日本語で「〜を期待する」という意味で、「テスト結果が〜になることを期待する」ということ。
-`expect`は引数をとり、その引数がどのような状態になっていること期待するのかによってさまざまなマッチャと組み合わせて使用する。
+テストには`expect`メソッドを使用すします。expectとは日本語で「〜を期待する」という意味で、「テスト結果が〜になることを期待する」ということを表しています。
+`expect`は引数をとり、その引数がどのような状態になっていることを期待するのかによってさまざまなマッチャと組み合わせて使用します。
 
-マッチャとは、期待値と実際の値を比較して、一致したかもしくは一致していないかを返すオブジェクトのこと。
-今回のケースでは`be_valid`というマッチャを使用していて、このマッチャは「〜は有効である」ことを示している。
-つまり、`expect(user).to be_valid`は「userインスタンスが有効であることを期待する」テストであるということ。
+マッチャとは、期待値と実際の値を比較して、一致したかもしくは一致していないかを返すオブジェクトのことです。
+今回のケースでは`be_valid`というマッチャを使用していて、このマッチャは「〜は有効である」ことを示しています。
+つまり、`expect(user).to be_valid`は「userインスタンスが有効であることを期待する」テストであるということです。
 
-ここで、失敗テストを実行してみる。
-「userインスタンスが有効であることを期待する」テストのため、失敗するテストとは、ここでは「userインスタンスが有効でないことを期待する」テストのこと。
-次のようにソースを変更する。
+このようにRSpecのテストでは基本的に`expect`とマッチャを使用して、期待した結果が得られるかどうかテストしていきます。
+
+ではここで、失敗テストも実行してみましょう。
+「userインスタンスが有効であることを期待する」テストなので、失敗するテストとは、ここでは「userインスタンスが有効でないことを期待する」テストのこととします。
+次のようにソースを変更します。
 
 ```ruby
 expect(user).to_not be_valid
 ```
 
-この状態でもう一度テストを実行する
+先ほどと比べると`to`が`to_not`となっています。
+`to`が「〜となることを期待する」を示しているのに対し、`to_not`は「〜とならないことを期待する」を示しています。
+
+この状態でもう一度テストを実行してみましょう。
 
 `ターミナル`
 ```ruby
@@ -195,19 +221,23 @@ Failed examples:
 rspec ./spec/models/user_spec.rb:4 # User nickname, email, password, password_confirmationがあれば有効であること
 ```
 
-上記の`Failure/Error: expect(user).to_not be_valid`のように、`expect(user).to_not be_valid`がエラーとなって、テストが失敗している。
+上記の`Failure/Error: expect(user).to_not be_valid`のように、`expect(user).to_not be_valid`がエラーとなって、テストが失敗しています。
 
 
 #### validationのテスト
-今回のUserモデルでは下記のようなvalidationを実装している。
+続いてvalidationのテストを実装していきます。
+
+今回のUserモデルでは下記のようなvalidationを実装しています。
+
 ```ruby
 validates :nickname, presence: true, uniqueness: true, length: { maximum: 10 }
 validates :password_confirmation, presence: true
 ```
-また、このほかにユーザーの認証にはdeviseを使用しているため、（詳細は割愛するが）deviseが設定しているvalidationが内部的に存在している。
+
+また、このほかにユーザーの認証にはdeviseを使用しているため、deviseが設定しているvalidationが内部的に存在しています。
 （例えばemailがnil or 空文字だと無効など)
 
-ここではnicknameのvalidationテストを実装する。
+ここではnicknameのvalidationテストを実装してみます。
 
 nicknameのvalidationは下記の通り.
 
@@ -219,7 +249,7 @@ validates :nickname, presence: true, uniqueness: true, length: { maximum: 10 }
 - 同じnicknameは保存できない (uniqueness: true)
 - 文字数は最大で10文字
 
-以上のことから、テストすべき観点は下記の通り。
+以上のことから、テストすべき観点は下記が想定されます。
 
 ```ruby
 it "nicknameがnilの場合、無効であること"
@@ -229,7 +259,7 @@ it "nicknameが10文字以内の場合、有効であること"
 it "nicknameが11文字以上の場合、無効であること"
 ```
 
-テストを実装すると下記の通り。
+では実際にテストを実装してみましょう。
 
 ```ruby
 require 'rails_helper'
@@ -305,7 +335,7 @@ end
 
 ```
 
-テストを実行する。
+テストを実行してみます。
 
 `ターミナル`
 ```ruby
@@ -325,16 +355,16 @@ Finished in 1.19 seconds (files took 4.51 seconds to load)
 5 examples, 0 failures
 ```
 
-となっていればテスト成功。
+となっていればテスト成功です。
 
-まず、何をテストするかを明示的に示すため、`describe`を使用する。
+まず、何をテストするかを明示的に示すため、`describe`を使用します。
 
 ```ruby
 describe 'nickname' do
 ```
 
-これでこのブロックはnicknameのテストを実装しているんだな、と理解できるようになる。
-続いてexampleについて、'nilの場合、無効であること'を例に解説する。
+これでこのブロックはnicknameのテストを実装しているんだな、と理解できるようになります。
+続いてexampleについて、'nilの場合、無効であること'を例に解説していきます。
 
 ```ruby
 it 'nilの場合、無効であること' do
@@ -349,8 +379,8 @@ it 'nilの場合、無効であること' do
 end
 ```
 
-以前のテスト同様に、まずはuserインスタンスを作成するが、今回は「nicknameがnilの場合」をテストしたいため、
-nicknameをnilの状態でインスタンスを作成する。
+以前のテスト同様に、まずはuserインスタンスを作成しますが、今回は「nicknameがnilの場合」をテストしたいため、
+nicknameをnilの状態でインスタンスを作成します。
 
 ```ruby
 user = User.new(
@@ -361,31 +391,33 @@ user = User.new(
 )
 ```
 
-そして`valid?`メソッドを使用してuserインスタンスが有効かどうかを返している。
+そして`valid?`メソッドを使用してuserインスタンスが有効かどうかを判定します。
 
 ```ruby
 user.valid?
 ```
 
-`valid?`メソッドは対象のオブジェクトが有効な場合はtrue、無効な場合はfalseを返し、errorsの中にエラー内容を格納する。
-そのエラー内容が意図したものになっているかテストをしている。
+`valid?`メソッドは対象のオブジェクトが有効な場合はtrue、無効な場合はfalseを返し、falseの場合はerrorsの中にエラー内容を格納します。
+そのエラー内容が意図したものになっているかテストをしています。
 
 ```ruby
 expect(user.errors[:nickname]).to include("を入力してください")
 ```
 
-※今回のアプリはエラーを日本語化しているため、「を入力してください」という少しわかりづらいメッセージになっている。
-英語の場合は「can't be blank」となる。
+※今回のアプリはエラーを日本語化しているため、「を入力してください」という少しわかりづらいメッセージになっています。
+英語の場合は「can't be blank」となります。
 
-このテストで使用しているマッチャは`include`で、引数に取ったものがexpectの引数のものと一致するか検証している。
+このテストで使用しているマッチャは`include`で、引数に取ったものがexpectの引数のものに含まれているか検証しています。
 
-ここでなぜエラー内容を検証しているか「11文字以上の場合、無効であること」のテストを例に考えてみる。
-「無効であること」をテストするのであれば、下記のようなテストでも良いように見える。
+ここで一つ疑問が発生します。
+> user.valid?でuserが無効な場合、falseを返すのであれば、「user.valid?がfalseであることを期待する」というテストではダメなのか？
+
+下記のようなテストでも良いように見えますね。
 
 ```ruby
 it '11文字以上の場合、無効であること' do
   user = User.new(
-    nickname: 'TakashiKaii',
+    nickname: 'TakashiKaii',     # 11文字
     email: 'tester@example.com',
     password: 'p@ssword!!',
     password_confirmation: 'p@ssword!!',
@@ -394,16 +426,16 @@ it '11文字以上の場合、無効であること' do
 end
 ```
 
-`expect`の引数に`user.valid?`をとり、`eq`マッチャを使用して`user.valid?`が`false`であることを期待するというテスト。
-実際にこのテストは通る。
+`expect`の引数に`user.valid?`をとり、`eq`マッチャを使用して`user.valid?`が`false`であることを期待するというテストです。
+こちらの方が先ほどのテストの方よりも一行短くなります。しかも、このテストは通ります。
 
-では下記の場合はどうなるか考えてみる。
+では下記の場合はどうなるか考えてみましょう。
 
 ```ruby
 it '11文字以上の場合、無効であること' do
   user = User.new(
-    nickname: 'TakashiKai',
-    email: '',
+    nickname: 'TakashiKai',      #間違えて10文字
+    email: '',　　                  #間違えてブランク
     password: 'p@ssword!!',
     password_confirmation: 'p@ssword!!',
   )
@@ -411,21 +443,21 @@ it '11文字以上の場合、無効であること' do
 end
 ```
 
-（極端なケースだが）上記のテストはnicknameは11文字以上である場合をテストしたいのに10文字になっているが、
-emailが無効な値のため、`user.valid?`は`false`になり、テストが通ってしまう。
+（極端なケースですが）上記のテストはnicknameは11文字以上である場合をテストしたいのに10文字になっていますが、
+emailが無効な値のため、`user.valid?`は`false`になり、テストが通ってしまいます。
 
-これでは「11文字以上の場合、無効であること」をテストしたことにはならない。
+これでは「11文字以上の場合、無効であること」をテストしたことにはなりません。
 
-今回のアプリのUserモデルのようなテストであれば記述量は少ないため、発生しにくいが、アプリが巨大化するにつれてこのようなミスは必ず増えてくる。
-そのときに、テストしようと思ったことが実はテストできておらず、しかもテストが通ってしまうという状況は品質低下につながるため要注意。
+今回のアプリのUserモデルのようなテストであれば記述量は少ないため、発生しにくいですが、アプリが巨大化するにつれてこのようなテスト自体のミスは必ず増えてきます。
+そのときに、テストしようと思ったことが実はテストできておらず、しかもテストが通ってしまうという状況は品質低下につながるため要注意です。
 
-今回の例では適切にエラーを検証するとテストが失敗するため、すぐに異変に気づくことができる。
+今回の例では適切にエラーを検証するとテストが失敗するため、すぐに異変に気づくことができます。
 
 ```ruby
 it '11文字以上の場合、無効であること' do
   user = User.new(
-    nickname: 'TakashiKai',
-    email: '',
+    nickname: 'TakashiKai',      #間違えて10文字
+    email: '',　　                  #間違えてブランク
     password: 'p@ssword!!',
     password_confirmation: 'p@ssword!!',
   )
@@ -434,7 +466,7 @@ it '11文字以上の場合、無効であること' do
 end
 ```
 
-テストを実行すると下記のように失敗する。
+テストを実行すると下記のように失敗します。
 
 ```ruby
 User
@@ -456,13 +488,13 @@ Failed examples:
 rspec ./spec/models/user_spec.rb:58 # User nickname 11文字以上の場合、無効であること
 ```
 
-`expected [] to include "は10文字以内で入力してください"`とあるように`user.errors[:nickname]`の中身が空のためエラーとなっている。
-（emailでエラーになっているため、`user.errors[:nickname]`は空で`user.errors[:email]`の中にエラーが格納されている）
+`expected [] to include "は10文字以内で入力してください"`とあるように`user.errors[:nickname]`の中身が空のためテストが失敗しています。
+（emailでエラーになっているため、`user.errors[:nickname]`は空で`user.errors[:email]`の中にエラーが格納されています）
 
 
 ### DRYに書く
 ここまでのテストを見てきて「冗長だな」と感じた方もいらっしゃると思います。
-ではRSpecでDRYに書く方法を紹介していきます。
+ではRSpecをDRYに書く方法をいくつか紹介していきます。
 
 今回のテストではexampleの中で何度も`User.new`が登場します。
 これを共有化して使用するためにはbeforeを使用します。
@@ -524,13 +556,15 @@ RSpec.describe User, type: :model do
 end
 
 ```
-`before`とは処理を定義すると、各exampleの実行前に実行されます。
+`before`は処理を定義すると、その処理が各exampleの実行前に実行されます。
 今回の場合はUserインスタンスを作成して`@user`に代入しています。
 テストを実行すると、各exampleの実行前に`@user`にインスタンスが代入されるため、example内で`@user`を呼び出すことができます。
 あとは各exampleに適したテストを実行するだけです。
 
-`before`のスコープはdescribeやまだ出てきていませんがcontextの中になります。今回は最上位のdescribe内で定義しているため、
-すべてのexampleから`@user`にアクセスできますが、これを
+`before`のスコープはdescribeやまだ出てきていませんがcontextの中になります。
+今回は最上位のdescribe内で定義しているため、すべてのexampleから`@user`にアクセスできますが、
+
+これを下記のように書き換えてみます。
 
 ```ruby
 ## 省略
@@ -549,7 +583,7 @@ describe 'nickname' do
 
 ```
 
-のようにすると`@user`は`describe 'nickname' do`内からしかアクセスできなくなります。
+このように`describe 'nickname' do`内に`before`を定義するとこの`describe`内からしかアクセスできなくなります。
 そのため、下記テストは失敗します。
 
 ```ruby
