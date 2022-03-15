@@ -496,8 +496,9 @@ rspec ./spec/models/user_spec.rb:58 # User nickname 11文字以上の場合、�
 ここまでのテストを見てきて「冗長だな」と感じた方もいらっしゃると思います。
 ではRSpecをDRYに書く方法をいくつか紹介していきます。
 
+#### before
 今回のテストではexampleの中で何度も`User.new`が登場します。
-これを共有化して使用するためにはbeforeを使用します。
+これを共有化して使用するためには`before`を使用します。
 
 まずはソースコードをこのように変更します。
 
@@ -591,6 +592,95 @@ it "nickname, email, password, password_confirmationがあれば有効である�
   expect(@user).to be_valid
 end
 ```
+
+#### let
+続いて`let`です。変数を作成するメソッドになりますが、変数を作成するタイミングが特徴的です。
+宣言した時には作成せず、その変数を呼び出した時に初めて作成されます。
+
+先ほどの`before`を`let`に置き換えてみます。
+
+```ruby
+require 'rails_helper'
+
+RSpec.describe User, type: :model do
+  let(:user) {
+    User.new(
+      nickname: 'Takashi',
+      email: 'tester@example.com',
+      password: 'p@ssword!!',
+      password_confirmation: 'p@ssword!!',
+    )
+  }
+
+  it "nickname, email, password, password_confirmationがあれば有効であること" do
+    expect(user).to be_valid
+  end
+
+  describe 'nickname' do
+    it 'nilの場合、無効であること' do
+      user.nickname = nil
+      expect(user.valid?).to eq(false)
+    end
+
+    it '空文字の場合、無効であること' do
+      user.nickname = ""
+      user.valid?
+      expect(user.errors[:nickname]).to include("を入力してください")
+    end
+
+    it 'すでに使用されているnicknameの場合、保存できないこと' do
+      user.save
+      new_user = User.new(
+        nickname: 'Takashi',
+        email: 'tester_2@example.com',
+        password: 'p@ssword!!',
+        password_confirmation: 'p@ssword!!',
+      )
+      new_user.valid?
+      expect(new_user.errors[:nickname]).to include("はすでに存在します")
+    end
+
+    it '10文字以内の場合、有効であること' do
+      user.nickname = 'TakashiKai'
+      expect(user).to be_valid
+    end
+
+    it '11文字以上の場合、無効であること' do
+      user.nickname = 'TakashiKaii'
+      user.valid?
+      expect(user.errors[:nickname]).to include("は10文字以内で入力してください")
+    end
+  end
+end
+
+```
+
+上記のように置き換えることができました。
+しかし、`before`との違いやメリットがこのままだとわかりづらいですね。
+わかりやすいように今度はPostモデルのテストで解説します。
+
+Postモデルを一旦このように実装しました。
+有効な属性の場合のテストのみ実装しています。
+
+```ruby
+require 'rails_helper'
+
+describe Post do
+  let(:user) { create(:user, nickname: 'Takashi') }
+
+　　　　　# 有効な属性の場合のテスト
+  it 'text, userがあれば有効であること' do
+    post = Post.new(
+      text: '投稿のテキスト',
+      user: user
+    )
+    expect(user).to be_valid
+  end
+end
+
+```
+
+
 
 
 let let! subject
