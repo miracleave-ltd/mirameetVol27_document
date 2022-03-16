@@ -281,25 +281,29 @@
 <p><code>ターミナル</code></p>
 <pre><code class="lang-ruby">rails g <span class="hljs-symbol">rspec:</span>install
 </code></pre>
-<p>下記のようにディレクトリ・ファイルが作成されれば完了です。
-create  .rspec
+<p>下記のようにディレクトリ・ファイルが作成されれば完了です。</p>
+<p>create  .rspec
 create  spec
 create  spec/spec_helper.rb
 create  spec/rails_helper.rb</p>
 <p>※RSpecの設定は各種ありますが、今回は割愛します。</p>
 <h2 id="2__Modelの単体テストの実装">3. 2. Modelの単体テストの実装</h2>
 <h3 id="モデルスペックの観点">3.1. モデルスペックの観点</h3>
+<p>モデルスペックでは以下のような観点で実装をします。</p>
 <ul>
 <li>有効な属性で初期化した場合、モデルが有効であることを検証する。</li>
 <li>無効な属性で初期化した場合、モデルが有効ではないことを検証する。</li>
 <li>クラスメソッドとインスタンスメソッドが定義されている場合は期待通りに動作すること。</li>
 </ul>
 <h3 id="ファイルの作成">3.2. ファイルの作成</h3>
+<p>まずはUserモデルを例にファイル作成をしていきます。</p>
 <p><code>ターミナル</code></p>
 <pre><code class="lang-ruby">rails g <span class="hljs-symbol">rspec:</span>model user
 </code></pre>
 <p><code>spec/models/user_spec.rb</code>というファイルが作成されていればOKです。</p>
 <h3 id="Userモデルの要件">3.3. Userモデルの要件</h3>
+<p>ではモデルスペックの観点を参考に、Userモデルでのテスト要件をまとめます。
+先ほど作成した<code>user_spec.rb</code>ファイルに必要なテストを以下のように記載しました。</p>
 <pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
 
 RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-symbol">:model</span> <span class="hljs-keyword">do</span>
@@ -313,6 +317,7 @@ RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-sy
   <span class="hljs-comment"># 各属性の有効・無効の場合のテスト</span>
   it <span class="hljs-string">&quot;nicknameがnilの場合、無効であること&quot;</span>
   it <span class="hljs-string">&quot;nicknameが空文字の場合、無効であること&quot;</span>
+  it <span class="hljs-string">&quot;nicknameが既に保存されている場合、無効であること&quot;</span>
   it <span class="hljs-string">&quot;nicknameが10文字以内の場合、有効であること&quot;</span>
   it <span class="hljs-string">&quot;nicknameが11文字以上の場合、無効であること&quot;</span>
   it <span class="hljs-string">&quot;emailがnilの場合、無効であること&quot;</span>
@@ -331,21 +336,481 @@ RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-sy
   it <span class="hljs-string">&quot;passwordとpassword_confirmationが不一致の場合、無効であること&quot;</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
+<p>このようにテストを書き始める際はまずはどのような観点が必要なのか洗い出してexampleとしてまとめると実装がしやすいです。</p>
+<p>上記の文法を説明していきます。</p>
 <h4 id="describe">3.3.1. describe</h4>
-<p>期待する結果をまとめる。上記では <code>descrive User</code>としていて、これがUserモデルのテストであると明示している。</p>
+<p>期待する結果をまとめます。上記では <code>describe User</code>としていて、これがUserモデルのテストであると明示しています。
+これはネストすることが可能で、<code>describe</code>の中に<code>describe</code>を実装することもできます。</p>
 <h4 id="it">3.3.2. it</h4>
-<p>実際のテストを実行するexampleを定義している。基本的にexample一つにつき一つの結果を期待する。</p>
+<p>実際のテストを実行するexampleを定義しています。</p>
 <ul>
-<li>exampleは明示的に記載する。省略することもできるが、可読性が落ちるため、基本的には記述する。</li>
-<li>exampleの説明は動詞で始まる。例えば、<code>nicknameがnilの場合、無効であること</code>を英語に置き換えると<code>is Invalid if nickname is nil</code>となる。</li>
+<li>基本的にexample一つにつき一つの結果を期待しています。</li>
+<li>exampleは明示的に記載します。省略することもできますが、可読性が落ちるため、基本的には記述することが望ましいです。</li>
+<li>exampleの説明は動詞で始まります。例えば、<code>nicknameがnilの場合、無効であること</code>を英語に置き換えると<code>is invalid if nickname is nil</code>となり、動詞から始まっていることがわかります。</li>
 </ul>
-<p>exampleを書く it &apos;~&apos; do end
-実装
-テストデータの作成方法(Factorybot、Fackerの導入)
-DRYに書く(before, subject, letなど)
+<h3 id="テストを実装する">3.4. テストを実装する</h3>
+<p>では、実際にテストを実装していきます。まずは、「有効な属性の場合のテスト」から実装しましょう。</p>
+<h4 id="有効な属性の場合のテスト">3.4.1. 有効な属性の場合のテスト</h4>
+<pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
+
+RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-symbol">:model</span> <span class="hljs-keyword">do</span>
+  <span class="hljs-comment"># 有効な属性の場合のテスト</span>
+  it <span class="hljs-string">&quot;nickname, email, password, password_confirmationがあれば有効であること&quot;</span> <span class="hljs-keyword">do</span>
+    user = User.new(
+      <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+      <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+      <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    )
+    expect(user).to be_valid
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>まず、<code>it ~ do end</code>でexampleのブロックを作成ます。今回は有効な属性のテストのため、exampleとして<code>it &quot;nickname, email, password, password_confirmationがあれば有効であること&quot; do end</code>としています。こうすることで、このテストが何をテストするのか非常にわかりやすくなります。</p>
+<p>続いて、<code>it</code>の中身を見てみましょう。最初にUserモデルのインスタンスを作成しています。
+今回は、すべての属性が有効である場合のテストのため、全ての属性が有効であるインスタンスを作成します。</p>
+<pre><code class="lang-ruby">user = User.new(
+  <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+  <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+  <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+  <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+)
+</code></pre>
+<p>最後に、本当にこのインスタンスが有効であるかどうかをチェックします。</p>
+<pre><code class="lang-ruby">expect(user).to be_valid
+</code></pre>
+<p>上記が実際のテストの実行構文です。
+まずはこのテストが通るかどうか実行してみます。</p>
+<p><code>ターミナル</code></p>
+<pre><code class="lang-ruby">bundle exec rspec spec/models/user_spec.rb
+</code></pre>
+<p>下記のようにターミナルに出力されればテスト成功です！</p>
+<pre><code class="lang-ruby">User
+  nickname, email, password, password_confirmationがあれば有効であること
+
+Finished <span class="hljs-keyword">in</span> <span class="hljs-number">0.29163</span> seconds (files took <span class="hljs-number">6.71</span> seconds to load)
+<span class="hljs-number">1</span> example, <span class="hljs-number">0</span> failures
+</code></pre>
+<p>では、<code>expect(user).to be_valid</code>が実際に何をやっているか一つずつ見ていきましょう。</p>
+<h4 id="expectメソッドとマッチャ">3.4.2. expectメソッドとマッチャ</h4>
+<p>テストには<code>expect</code>メソッドを使用すします。expectとは日本語で「〜を期待する」という意味で、「テスト結果が〜になることを期待する」ということを表しています。
+<code>expect</code>は引数をとり、その引数がどのような状態になっていることを期待するのかによってさまざまなマッチャと組み合わせて使用します。</p>
+<p>マッチャとは、期待値と実際の値を比較して、一致したかもしくは一致していないかを返すオブジェクトのことです。
+今回のケースでは<code>be_valid</code>というマッチャを使用していて、このマッチャは「〜は有効である」ことを示しています。
+つまり、<code>expect(user).to be_valid</code>は「userインスタンスが有効であることを期待する」テストであるということです。</p>
+<p>このようにRSpecのテストでは基本的に<code>expect</code>とマッチャを使用して、期待した結果が得られるかどうかテストしていきます。</p>
+<p>ではここで、失敗テストも実行してみましょう。
+「userインスタンスが有効であることを期待する」テストなので、失敗するテストとは、ここでは「userインスタンスが有効でないことを期待する」テストのこととします。
+次のようにソースを変更します。</p>
+<pre><code class="lang-ruby">expect(user).to_not be_valid
+</code></pre>
+<p>先ほどと比べると<code>to</code>が<code>to_not</code>となっています。
+<code>to</code>が「〜となることを期待する」を示しているのに対し、<code>to_not</code>は「〜とならないことを期待する」を示しています。</p>
+<p>この状態でもう一度テストを実行してみましょう。</p>
+<p><code>ターミナル</code></p>
+<pre><code class="lang-ruby">bundle exec rspec spec/models/user_spec.rb
+</code></pre>
+<p>下記のようにターミナルに出力されれば期待通りのテスト結果。</p>
+<pre><code class="lang-ruby">User
+  nickname, email, password, password_confirmationがあれば有効であること (FAILED - <span class="hljs-number">1</span>)
+
+<span class="hljs-symbol">Failures:</span>
+
+  <span class="hljs-number">1</span>) User nickname, email, password, password_confirmationがあれば有効であること
+     Failure/<span class="hljs-symbol">Error:</span> expect(user).to_not be_valid
+       expected #&lt;User id: nil, email: &quot;tester@example.com&quot;, nickname: &quot;Takashi&quot;, created_at: nil, updated_at: nil&gt; <span class="hljs-keyword">not</span> to be valid
+     <span class="hljs-comment"># ./spec/models/user_spec.rb:11:in `block (2 levels) in &lt;top (required)&gt;&apos;</span>
+
+Finished <span class="hljs-keyword">in</span> <span class="hljs-number">0.09446</span> seconds (files took <span class="hljs-number">4.89</span> seconds to load)
+<span class="hljs-number">1</span> example, <span class="hljs-number">1</span> failure
+
+Failed <span class="hljs-symbol">examples:</span>
+
+rspec ./spec/models/user_spec.<span class="hljs-symbol">rb:</span><span class="hljs-number">4</span> <span class="hljs-comment"># User nickname, email, password, password_confirmationがあれば有効であること</span>
+</code></pre>
+<p>上記の<code>Failure/Error: expect(user).to_not be_valid</code>のように、<code>expect(user).to_not be_valid</code>がエラーとなって、テストが失敗しています。</p>
+<h4 id="validationのテスト">3.4.3. validationのテスト</h4>
+<p>続いてvalidationのテストを実装していきます。</p>
+<p>今回のUserモデルでは下記のようなvalidationを実装しています。</p>
+<pre><code class="lang-ruby">validates <span class="hljs-symbol">:nickname</span>, <span class="hljs-symbol">presence:</span> <span class="hljs-literal">true</span>, <span class="hljs-symbol">uniqueness:</span> <span class="hljs-literal">true</span>, <span class="hljs-symbol">length:</span> { <span class="hljs-symbol">maximum:</span> <span class="hljs-number">10</span> }
+validates <span class="hljs-symbol">:password_confirmation</span>, <span class="hljs-symbol">presence:</span> <span class="hljs-literal">true</span>
+</code></pre>
+<p>また、このほかにユーザーの認証にはdeviseを使用しているため、deviseが設定しているvalidationが内部的に存在しています。
+（例えばemailがnil or 空文字だと無効など)</p>
+<p>ここではnicknameのvalidationテストを実装してみます。</p>
+<p>nicknameのvalidationは下記の通り.</p>
+<pre><code class="lang-ruby">validates <span class="hljs-symbol">:nickname</span>, <span class="hljs-symbol">presence:</span> <span class="hljs-literal">true</span>, <span class="hljs-symbol">uniqueness:</span> <span class="hljs-literal">true</span>, <span class="hljs-symbol">length:</span> { <span class="hljs-symbol">maximum:</span> <span class="hljs-number">10</span> }
+</code></pre>
+<ul>
+<li>nilまたは空文字の場合は無効 (presence: true)</li>
+<li>同じnicknameは保存できない (uniqueness: true)</li>
+<li>文字数は最大で10文字</li>
+</ul>
+<p>以上のことから、テストすべき観点は下記が想定されます。</p>
+<pre><code class="lang-ruby">it <span class="hljs-string">&quot;nicknameがnilの場合、無効であること&quot;</span>
+it <span class="hljs-string">&quot;nicknameが空文字の場合、無効であること&quot;</span>
+it <span class="hljs-string">&quot;nicknameが既に保存されている場合、無効であること&quot;</span>
+it <span class="hljs-string">&quot;nicknameが10文字以内の場合、有効であること&quot;</span>
+it <span class="hljs-string">&quot;nicknameが11文字以上の場合、無効であること&quot;</span>
+</code></pre>
+<p>では実際にテストを実装してみましょう。</p>
+<pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
+
+RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-symbol">:model</span> <span class="hljs-keyword">do</span>
+  <span class="hljs-comment"># 有効な属性の場合のテスト</span>
+
+  <span class="hljs-comment">## 省略</span>
+
+ describe <span class="hljs-string">&apos;nickname&apos;</span> <span class="hljs-keyword">do</span>
+  it <span class="hljs-string">&apos;nilの場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+    user = User.new(
+      <span class="hljs-symbol">nickname:</span> <span class="hljs-literal">nil</span>,
+      <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+      <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    )
+    user.valid?
+    expect(user.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;を入力してください&quot;</span>)
+  <span class="hljs-keyword">end</span>
+
+  it <span class="hljs-string">&apos;空文字の場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+    user = User.new(
+      <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&quot;&quot;</span>,
+      <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+      <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    )
+    user.valid?
+    expect(user.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;を入力してください&quot;</span>)
+  <span class="hljs-keyword">end</span>
+
+  it <span class="hljs-string">&apos;すでに使用されているnicknameの場合、保存できないこと&apos;</span> <span class="hljs-keyword">do</span>
+    User.create(
+      <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+      <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester_1@example.com&apos;</span>,
+      <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    )
+
+    user = User.new(
+      <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+      <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester_2@example.com&apos;</span>,
+      <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    )
+    user.valid?
+    expect(user.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;はすでに存在します&quot;</span>)
+  <span class="hljs-keyword">end</span>
+
+  it <span class="hljs-string">&apos;10文字以内の場合、有効であること&apos;</span> <span class="hljs-keyword">do</span>
+    user = User.new(
+      <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;TakashiKai&apos;</span>,
+      <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+      <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    )
+    expect(user).to be_valid
+  <span class="hljs-keyword">end</span>
+
+  it <span class="hljs-string">&apos;11文字以上の場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+    user = User.new(
+      <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;TakashiKaii&apos;</span>,
+      <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+      <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    )
+    user.valid?
+    expect(user.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;は10文字以内で入力してください&quot;</span>)
+  <span class="hljs-keyword">end</span>
+ <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>テストを実行してみます。</p>
+<p><code>ターミナル</code></p>
+<pre><code class="lang-ruby">bundle exec rspec spec/models/user_spec.rb
+</code></pre>
+<pre><code class="lang-ruby">User
+  nickname
+    <span class="hljs-literal">nil</span>の場合、無効であること
+    空文字の場合、無効であること
+    すでに使用されているnicknameの場合、保存できないこと
+    <span class="hljs-number">10</span>文字以内の場合、有効であること
+    <span class="hljs-number">11</span>文字以上の場合、無効であること
+
+Finished <span class="hljs-keyword">in</span> <span class="hljs-number">1.19</span> seconds (files took <span class="hljs-number">4.51</span> seconds to load)
+<span class="hljs-number">5</span> examples, <span class="hljs-number">0</span> failures
+</code></pre>
+<p>となっていればテスト成功です。</p>
+<p>まず、何をテストするかを明示的に示すため、<code>describe</code>を使用します。</p>
+<pre><code class="lang-ruby">describe <span class="hljs-string">&apos;nickname&apos;</span> <span class="hljs-keyword">do</span>
+</code></pre>
+<p>これでこのブロックはnicknameのテストを実装しているんだな、と理解できるようになります。
+続いてexampleについて、&apos;nilの場合、無効であること&apos;を例に解説していきます。</p>
+<pre><code class="lang-ruby">it <span class="hljs-string">&apos;nilの場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+  user = User.new(
+    <span class="hljs-symbol">nickname:</span> <span class="hljs-literal">nil</span>,
+    <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+    <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+  )
+  user.valid?
+  expect(user.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;を入力してください&quot;</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>以前のテスト同様に、まずはuserインスタンスを作成しますが、今回は「nicknameがnilの場合」をテストしたいため、
+nicknameをnilの状態でインスタンスを作成します。</p>
+<pre><code class="lang-ruby">user = User.new(
+  <span class="hljs-symbol">nickname:</span> <span class="hljs-literal">nil</span>,
+  <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+  <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+  <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+)
+</code></pre>
+<p>そして<code>valid?</code>メソッドを使用してuserインスタンスが有効かどうかを判定します。</p>
+<pre><code class="lang-ruby">user.valid?
+</code></pre>
+<p><code>valid?</code>メソッドは対象のオブジェクトが有効な場合はtrue、無効な場合はfalseを返し、falseの場合はerrorsの中にエラー内容を格納します。
+そのエラー内容が意図したものになっているかテストをしています。</p>
+<pre><code class="lang-ruby">expect(user.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;を入力してください&quot;</span>)
+</code></pre>
+<p>※今回のアプリはエラーを日本語化しているため、「を入力してください」という少しわかりづらいメッセージになっています。
+英語の場合は「can&apos;t be blank」となります。</p>
+<p>このテストで使用しているマッチャは<code>include</code>で、引数に取ったものがexpectの引数のものに含まれているか検証しています。</p>
+<p>ここで一つ疑問が発生します。</p>
+<blockquote>
+<p>user.valid?でuserが無効な場合、falseを返すのであれば、「user.valid?がfalseであることを期待する」というテストではダメなのか？</p>
+</blockquote>
+<p>下記のようなテストでも良いように見えますね。</p>
+<pre><code class="lang-ruby">it <span class="hljs-string">&apos;11文字以上の場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+  user = User.new(
+    <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;TakashiKaii&apos;</span>,     <span class="hljs-comment"># 11文字</span>
+    <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+    <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+  )
+  expect(user.valid?).to eq(<span class="hljs-literal">false</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><code>expect</code>の引数に<code>user.valid?</code>をとり、<code>eq</code>マッチャを使用して<code>user.valid?</code>が<code>false</code>であることを期待するというテストです。
+こちらの方が先ほどのテストの方よりも一行短くなります。しかも、このテストは通ります。</p>
+<p>では下記の場合はどうなるか考えてみましょう。</p>
+<pre><code class="lang-ruby">it <span class="hljs-string">&apos;11文字以上の場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+  user = User.new(
+    <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;TakashiKai&apos;</span>,      <span class="hljs-comment">#間違えて10文字</span>
+    <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;&apos;</span>,　　                  <span class="hljs-comment">#間違えてブランク</span>
+    <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+  )
+  expect(user.valid?).to eq(<span class="hljs-literal">false</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>（極端なケースですが）上記のテストはnicknameは11文字以上である場合をテストしたいのに10文字になっていますが、
+emailが無効な値のため、<code>user.valid?</code>は<code>false</code>になり、テストが通ってしまいます。</p>
+<p>これでは「11文字以上の場合、無効であること」をテストしたことにはなりません。</p>
+<p>今回のアプリのUserモデルのようなテストであれば記述量は少ないため、発生しにくいですが、アプリが巨大化するにつれてこのようなテスト自体のミスは必ず増えてきます。
+そのときに、テストしようと思ったことが実はテストできておらず、しかもテストが通ってしまうという状況は品質低下につながるため要注意です。</p>
+<p>今回の例では適切にエラーを検証するとテストが失敗するため、すぐに異変に気づくことができます。</p>
+<pre><code class="lang-ruby">it <span class="hljs-string">&apos;11文字以上の場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+  user = User.new(
+    <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;TakashiKai&apos;</span>,      <span class="hljs-comment">#間違えて10文字</span>
+    <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;&apos;</span>,　　                  <span class="hljs-comment">#間違えてブランク</span>
+    <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+  )
+  user.valid?
+  expect(user.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;は10文字以内で入力してください&quot;</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>テストを実行すると下記のように失敗します。</p>
+<pre><code class="lang-ruby">User
+  nickname
+    <span class="hljs-number">11</span>文字以上の場合、無効であること (FAILED - <span class="hljs-number">1</span>)
+
+<span class="hljs-symbol">Failures:</span>
+
+  <span class="hljs-number">1</span>) User nickname <span class="hljs-number">11</span>文字以上の場合、無効であること
+     Failure/<span class="hljs-symbol">Error:</span> expect(user.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;は10文字以内で入力してください&quot;</span>)
+       expected [] to <span class="hljs-keyword">include</span> <span class="hljs-string">&quot;は10文字以内で入力してください&quot;</span>
+     <span class="hljs-comment"># ./spec/models/user_spec.rb:66:in `block (3 levels) in &lt;top (required)&gt;&apos;</span>
+
+Finished <span class="hljs-keyword">in</span> <span class="hljs-number">0.67955</span> seconds (files took <span class="hljs-number">4.55</span> seconds to load)
+<span class="hljs-number">1</span> example, <span class="hljs-number">1</span> failure
+
+Failed <span class="hljs-symbol">examples:</span>
+
+rspec ./spec/models/user_spec.<span class="hljs-symbol">rb:</span><span class="hljs-number">58</span> <span class="hljs-comment"># User nickname 11文字以上の場合、無効であること</span>
+</code></pre>
+<p><code>expected [] to include &quot;は10文字以内で入力してください&quot;</code>とあるように<code>user.errors[:nickname]</code>の中身が空のためテストが失敗しています。
+（emailでエラーになっているため、<code>user.errors[:nickname]</code>は空で<code>user.errors[:email]</code>の中にエラーが格納されています）</p>
+<h3 id="DRYに書く">3.5. DRYに書く</h3>
+<p>ここまでのテストを見てきて「冗長だな」と感じた方もいらっしゃると思います。
+ではRSpecをDRYに書く方法をいくつか紹介していきます。</p>
+<h4 id="before">3.5.1. before</h4>
+<p>今回のテストではexampleの中で何度も<code>User.new</code>が登場します。
+これを共有化して使用するためには<code>before</code>を使用します。</p>
+<p>まずはソースコードをこのように変更します。</p>
+<pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
+
+RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-symbol">:model</span> <span class="hljs-keyword">do</span>
+  before <span class="hljs-keyword">do</span>
+    <span class="hljs-variable">@user</span> = User.new(
+      <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+      <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+      <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    )
+  <span class="hljs-keyword">end</span>
+
+  it <span class="hljs-string">&quot;nickname, email, password, password_confirmationがあれば有効であること&quot;</span> <span class="hljs-keyword">do</span>
+    expect(<span class="hljs-variable">@user</span>).to be_valid
+  <span class="hljs-keyword">end</span>
+
+  describe <span class="hljs-string">&apos;nickname&apos;</span> <span class="hljs-keyword">do</span>
+    it <span class="hljs-string">&apos;nilの場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+      <span class="hljs-variable">@user</span>.nickname = <span class="hljs-literal">nil</span>
+      expect(<span class="hljs-variable">@user</span>.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;を入力してください&quot;</span>)
+    <span class="hljs-keyword">end</span>
+
+    it <span class="hljs-string">&apos;空文字の場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+      <span class="hljs-variable">@user</span>.nickname = <span class="hljs-string">&quot;&quot;</span>
+      <span class="hljs-variable">@user</span>.valid?
+      expect(<span class="hljs-variable">@user</span>.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;を入力してください&quot;</span>)
+    <span class="hljs-keyword">end</span>
+
+    it <span class="hljs-string">&apos;すでに使用されているnicknameの場合、保存できないこと&apos;</span> <span class="hljs-keyword">do</span>
+      <span class="hljs-variable">@user</span>.save
+      user = User.new(
+        <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+        <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester_2@example.com&apos;</span>,
+        <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+        <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      )
+      user.valid?
+      expect(user.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;はすでに存在します&quot;</span>)
+    <span class="hljs-keyword">end</span>
+
+    it <span class="hljs-string">&apos;10文字以内の場合、有効であること&apos;</span> <span class="hljs-keyword">do</span>
+      <span class="hljs-variable">@user</span>.nickname = <span class="hljs-string">&apos;TakashiKai&apos;</span>
+      expect(<span class="hljs-variable">@user</span>).to be_valid
+    <span class="hljs-keyword">end</span>
+
+    it <span class="hljs-string">&apos;11文字以上の場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+      <span class="hljs-variable">@user</span>.nickname = <span class="hljs-string">&apos;TakashiKaii&apos;</span>
+      <span class="hljs-variable">@user</span>.valid?
+      expect(<span class="hljs-variable">@user</span>.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;は10文字以内で入力してください&quot;</span>)
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><code>before</code>は処理を定義すると、その処理が各exampleの実行前に実行されます。
+今回の場合はUserインスタンスを作成して<code>@user</code>に代入しています。
+テストを実行すると、各exampleの実行前に<code>@user</code>にインスタンスが代入されるため、example内で<code>@user</code>を呼び出すことができます。
+あとは各exampleに適したテストを実行するだけです。</p>
+<p><code>before</code>のスコープはdescribeやまだ出てきていませんがcontextの中になります。
+今回は最上位のdescribe内で定義しているため、すべてのexampleから<code>@user</code>にアクセスできますが、</p>
+<p>これを下記のように書き換えてみます。</p>
+<pre><code class="lang-ruby"><span class="hljs-comment">## 省略</span>
+
+describe <span class="hljs-string">&apos;nickname&apos;</span> <span class="hljs-keyword">do</span>
+  before <span class="hljs-keyword">do</span>
+    <span class="hljs-variable">@user</span> = User.new(
+      <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+      <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+      <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    )
+  <span class="hljs-keyword">end</span>
+
+<span class="hljs-comment">## 省略</span>
+</code></pre>
+<p>このように<code>describe &apos;nickname&apos; do</code>内に<code>before</code>を定義するとこの<code>describe</code>内からしかアクセスできなくなります。
+そのため、下記テストは失敗します。</p>
+<pre><code class="lang-ruby">it <span class="hljs-string">&quot;nickname, email, password, password_confirmationがあれば有効であること&quot;</span> <span class="hljs-keyword">do</span>
+  expect(<span class="hljs-variable">@user</span>).to be_valid
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h4 id="let">3.5.2. let</h4>
+<p>続いて<code>let</code>です。変数を作成するメソッドになりますが、変数を作成するタイミングが特徴的です。
+宣言した時には作成せず、その変数を呼び出した時に初めて作成されます。</p>
+<p>先ほどの<code>before</code>を<code>let</code>に置き換えてみます。</p>
+<pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
+
+RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-symbol">:model</span> <span class="hljs-keyword">do</span>
+  let(<span class="hljs-symbol">:user</span>) {
+    User.new(
+      <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+      <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+      <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    )
+  }
+
+  it <span class="hljs-string">&quot;nickname, email, password, password_confirmationがあれば有効であること&quot;</span> <span class="hljs-keyword">do</span>
+    expect(user).to be_valid
+  <span class="hljs-keyword">end</span>
+
+  describe <span class="hljs-string">&apos;nickname&apos;</span> <span class="hljs-keyword">do</span>
+    it <span class="hljs-string">&apos;nilの場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+      user.nickname = <span class="hljs-literal">nil</span>
+      expect(user.valid?).to eq(<span class="hljs-literal">false</span>)
+    <span class="hljs-keyword">end</span>
+
+    it <span class="hljs-string">&apos;空文字の場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+      user.nickname = <span class="hljs-string">&quot;&quot;</span>
+      user.valid?
+      expect(user.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;を入力してください&quot;</span>)
+    <span class="hljs-keyword">end</span>
+
+    it <span class="hljs-string">&apos;すでに使用されているnicknameの場合、保存できないこと&apos;</span> <span class="hljs-keyword">do</span>
+      user.save
+      new_user = User.new(
+        <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+        <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester_2@example.com&apos;</span>,
+        <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+        <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      )
+      new_user.valid?
+      expect(new_user.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;はすでに存在します&quot;</span>)
+    <span class="hljs-keyword">end</span>
+
+    it <span class="hljs-string">&apos;10文字以内の場合、有効であること&apos;</span> <span class="hljs-keyword">do</span>
+      user.nickname = <span class="hljs-string">&apos;TakashiKai&apos;</span>
+      expect(user).to be_valid
+    <span class="hljs-keyword">end</span>
+
+    it <span class="hljs-string">&apos;11文字以上の場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+      user.nickname = <span class="hljs-string">&apos;TakashiKaii&apos;</span>
+      user.valid?
+      expect(user.errors[<span class="hljs-symbol">:nickname</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;は10文字以内で入力してください&quot;</span>)
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>上記のように置き換えることができました。
+しかし、<code>before</code>との違いやメリットがこのままだとわかりづらいですね。
+わかりやすいように今度はPostモデルのテストで解説します。</p>
+<p>Postモデルを一旦このように実装しました。
+有効な属性の場合のテストのみ実装しています。</p>
+<pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
+
+describe Post <span class="hljs-keyword">do</span>
+  let(<span class="hljs-symbol">:user</span>) { create(<span class="hljs-symbol">:user</span>, <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>) }
+
+　　　　　<span class="hljs-comment"># 有効な属性の場合のテスト</span>
+  it <span class="hljs-string">&apos;text, userがあれば有効であること&apos;</span> <span class="hljs-keyword">do</span>
+    post = Post.new(
+      <span class="hljs-symbol">text:</span> <span class="hljs-string">&apos;投稿のテキスト&apos;</span>,
+      <span class="hljs-symbol">user:</span> user
+    )
+    expect(user).to be_valid
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>let let! subject</p>
+<p>テストデータの作成方法(Factorybot、Fackerの導入)
 外部APIテスト
 vcrの使用方法</p>
-<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#単体テスト">単体テスト</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#1__RSpecの導入方法">2. 1. RSpecの導入方法</a></li><li><a href="#2__Modelの単体テストの実装">3. 2. Modelの単体テストの実装</a></li><ul><li><a href="#モデルスペックの観点">3.1. モデルスペックの観点</a></li><li><a href="#ファイルの作成">3.2. ファイルの作成</a></li><li><a href="#Userモデルの要件">3.3. Userモデルの要件</a></li><ul><li><a href="#describe">3.3.1. describe</a></li><li><a href="#it">3.3.2. it</a></li></ul></ul></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
+<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#単体テスト">単体テスト</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#1__RSpecの導入方法">2. 1. RSpecの導入方法</a></li><li><a href="#2__Modelの単体テストの実装">3. 2. Modelの単体テストの実装</a></li><ul><li><a href="#モデルスペックの観点">3.1. モデルスペックの観点</a></li><li><a href="#ファイルの作成">3.2. ファイルの作成</a></li><li><a href="#Userモデルの要件">3.3. Userモデルの要件</a></li><ul><li><a href="#describe">3.3.1. describe</a></li><li><a href="#it">3.3.2. it</a></li></ul><li><a href="#テストを実装する">3.4. テストを実装する</a></li><ul><li><a href="#有効な属性の場合のテスト">3.4.1. 有効な属性の場合のテスト</a></li><li><a href="#expectメソッドとマッチャ">3.4.2. expectメソッドとマッチャ</a></li><li><a href="#validationのテスト">3.4.3. validationのテスト</a></li></ul><li><a href="#DRYに書く">3.5. DRYに書く</a></li><ul><li><a href="#before">3.5.1. before</a></li><li><a href="#let">3.5.2. let</a></li></ul></ul></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
                                 
                                 </section>
                             
@@ -388,7 +853,7 @@ vcrの使用方法</p>
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"next":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"previous":{"title":"2.RSpecの概要解説","level":"1.3","depth":1,"path":"Section_2.md","ref":"Section_2.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_3.md","mtime":"2022-03-13T12:11:45.795Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-13T12:14:46.128Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"next":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"previous":{"title":"2.RSpecの概要解説","level":"1.3","depth":1,"path":"Section_2.md","ref":"Section_2.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_3.md","mtime":"2022-03-16T09:18:13.892Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-16T09:24:36.367Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

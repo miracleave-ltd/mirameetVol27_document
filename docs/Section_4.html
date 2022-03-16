@@ -261,16 +261,35 @@
 <h2 id="本クションで行うこと">1. 本クションで行うこと</h2>
 <ol>
 <li>今回取り上げる結合テストについて</li>
-<li>RequestSpecの解説</li>
+<li>Request specの解説</li>
 <li>本アプリでの実例紹介（後で変更するかも）</li>
 </ol>
 <h2 id="今回取り上げる結合テストについて">2. 今回取り上げる結合テストについて</h2>
-<p>結合テストは、Integration Test(統合テスト)とも呼ばれ、システム開発において単体レベルで開発した機能が組み合わさって動作した時、期待される動作をするかどうかをテストします<br>結合テストは、実施する対象によって内部結合・外部結合に分かれます  </p>
+<p>結合テストは、Integration Test(統合テスト)とも呼ばれ、システム開発において単体レベルで開発した機能が組み合わさって動作した時、期待される動作をするかどうかをテストします。<br>結合テストは、実施する対象によって内部結合・外部結合に分かれます。  </p>
 <p><strong>内部結合</strong>・・・ システム内部の機能同士を組み合わせてテストを行う<br><strong>外部結合</strong>・・・ システム内部の機能とシステム外部の機能を組み合わせてテストを行う</p>
 <p>今回取り上げる結合テストは「内部結合」になります
 <img width="705" alt="スクリーンショット 2022-03-13 21 01 04" src="https://user-images.githubusercontent.com/52161269/158058448-6788ff57-03d4-4de7-b51e-cdd24fe626f3.png"></p>
-<h2 id="RequestSpecの解説">3. RequestSpecの解説</h2>
-<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#結合テスト（IT）">結合テスト（IT）</a></p><li><a href="#本クションで行うこと">1. 本クションで行うこと</a></li><li><a href="#今回取り上げる結合テストについて">2. 今回取り上げる結合テストについて</a></li><li><a href="#RequestSpecの解説">3. RequestSpecの解説</a></li></ul></div><a href="#本クションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
+<p>今回の投稿アプリでは、以下３つの機能があります。</p>
+<ol>
+<li>ユーザー機能(users_controller)<br>ユーザー作成、ユーザー認証（ログイン・ログアウト）</li>
+<li>投稿機能(posts_controller)<br>投稿の新規作成、投稿の編集、投稿の一覧表示、投稿削除</li>
+<li>コメント機能(comments_controller)<br>対象の投稿に対してコメントの作成</li>
+</ol>
+<p>内部結合では、３つの機能の間の連携部分が期待される動きをするか？というテストをします。
+具体的な観点は以下です。</p>
+<ul>
+<li>コントローラーへのリクエストが通ること</li>
+<li>期待されるレスポンスが返却されること</li>
+</ul>
+<p><strong>　↑の観点は足りてないかも、、、後で再チェックする</strong></p>
+<h2 id="Request_specの解説">3. Request specの解説</h2>
+<p><strong>Request specで出来ること</strong></p>
+<ul>
+<li>リクエストのテストができる</li>
+<li>複数コントローラーの複数のリクエストがテストできる</li>
+<li>複数のセッションでリクエストを指定できる</li>
+</ul>
+<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#結合テスト（IT）">結合テスト（IT）</a></p><li><a href="#本クションで行うこと">1. 本クションで行うこと</a></li><li><a href="#今回取り上げる結合テストについて">2. 今回取り上げる結合テストについて</a></li><li><a href="#Request_specの解説">3. Request specの解説</a></li></ul></div><a href="#本クションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
                                 
                                 </section>
                             
@@ -313,7 +332,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"next":{"title":"5.統合テスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"previous":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"path":"Section_3.md","ref":"Section_3.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_4.md","mtime":"2022-03-13T12:11:45.799Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-13T12:14:46.128Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"next":{"title":"5.統合テスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"previous":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"path":"Section_3.md","ref":"Section_3.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_4.md","mtime":"2022-03-16T09:18:13.893Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-16T09:24:36.367Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
