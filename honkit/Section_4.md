@@ -35,13 +35,54 @@
 
 ## Request specの解説
 
-**Request specで出来ること**
-- リクエストのテストができる
+それではRequest specを使って結合テストを実装しましょう!  
+Request specを使うと、以下のテストができるようになります。
+
+- HTTPリクエストのテストができる
 - 複数コントローラーの複数のリクエストがテストできる
 - 複数のセッションでリクエストを指定できる
 
+以下、Request specファイルの生成コマンド
+```
+rails g rspec:request ファイル名
+```
 
+今回は投稿機能のコントローラーの結合テスト(posts_spec.rb)を例にテストコードを見ていきましょう。  
+path: spec/requests/posts_spec.rb  
+```
+require 'rails_helper'
 
+RSpec.describe 'Posts', type: :request do
+  let(:user) { create(:user, nickname: 'Takashi') }
+  let(:post_instance) { create(:post, user: user, text: 'PostRequestTest', image: 'https://example_image_url') }
+
+  describe '投稿一覧' do
+    subject { get posts_url }
+
+    context 'ログインしている場合' do
+      before do
+        sign_in user
+        post_instance
+      end
+
+      it_behaves_like 'return_response_status', 200
+
+      it 'レスポンスに適切な投稿内容を含むこと' do
+        subject
+        aggregate_failures do
+          expect(response.body).to include 'PostRequestTest :Takashiの投稿'
+          expect(response.body).to include '<span>投稿者</span>Takashi'
+        end
+      end
+    end
+
+    it_behaves_like 'ログインしていない場合'
+  end
+  
+  ~~~~省略~~~~~
+  
+end
+```
 
 
 
