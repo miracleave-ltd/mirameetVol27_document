@@ -35,24 +35,52 @@
 
 ## Request specの解説
 
-それではRequest specを使って結合テストを実装しましょう!  
 Request specを使うと、以下のテストができるようになります。
 
 - HTTPリクエストのテストができる
 - 複数コントローラーの複数のリクエストがテストできる
 - 複数のセッションでリクエストを指定できる
 
+
 以下、Request specファイルの生成コマンド
 ```
 rails g rspec:request ファイル名
 ```
 
-今回は投稿機能のコントローラーの結合テスト(posts_spec.rb)を例にテストコードを見ていきましょう。  
-path: spec/requests/posts_spec.rb  
-```
-require 'rails_helper'
+今回は投稿機能の結合テスト(posts_spec.rb)を例に実際のテストコードを確認していきます。  
+これから説明するテストの内容は、以下です。  
+ユーザーがログインしている場合は投稿一覧のリクエストが成功すること
 
-RSpec.describe 'Posts', type: :request do
+テストデータとして、ログインユーザーと投稿を生成
+```
+  let(:user) { create(:user, nickname: 'Takashi') }
+  let(:post_instance) { create(:post, user: user, text: 'PostRequestTest', image: 'https://example_image_url') }
+```
+
+subject(テスト対象のオブジェクト)は、投稿一覧のリクエスト処理
+```
+subject { get posts_url }
+```
+
+テスト前にテストデータのユーザーでログイン処理とlet変数（post_instance）を呼び出しておく
+```
+before do
+    sign_in user
+    post_instance
+end
+```
+
+リクストが通ることを確認するので、HTTPresposeが200であることが期待値
+```
+it_behaves_like 'return_response_status', 200
+```
+
+
+
+
+上記コード全体
+
+```
   let(:user) { create(:user, nickname: 'Takashi') }
   let(:post_instance) { create(:post, user: user, text: 'PostRequestTest', image: 'https://example_image_url') }
 
@@ -75,13 +103,8 @@ RSpec.describe 'Posts', type: :request do
         end
       end
     end
-
-    it_behaves_like 'ログインしていない場合'
-  end
   
   ~~~~省略~~~~~
-  
-end
 ```
 
 
