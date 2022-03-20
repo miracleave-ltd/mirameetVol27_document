@@ -51,18 +51,19 @@ rails g rspec:request ファイル名
 これから説明するテストの内容は、以下です。  
 ユーザーがログインしている場合は投稿一覧のリクエストが成功すること
 
-テストデータとして、ログインユーザーと投稿を生成
+①テストデータとして、ログインユーザーと投稿を生成
 ```
   let(:user) { create(:user, nickname: 'Takashi') }
   let(:post_instance) { create(:post, user: user, text: 'PostRequestTest', image: 'https://example_image_url') }
 ```
 
-subject(テスト対象のオブジェクト)は、投稿一覧のリクエスト処理
+②subject(テスト対象のオブジェクト)は、投稿一覧のリクエスト処理  
+Request specでは直接ルーティング名を指定することができます。
 ```
 subject { get posts_url }
 ```
 
-テスト前にテストデータのユーザーでログイン処理とlet変数（post_instance）を呼び出しておく
+③テスト前にテストデータのユーザーでログイン処理とlet変数（post_instance）を呼び出しておく
 ```
 before do
     sign_in user
@@ -70,12 +71,10 @@ before do
 end
 ```
 
-リクストが通ることを確認するので、HTTPresposeが200であることが期待値
+④リクストが通ることを確認するので、HTTPresposeが200であることが期待値
 ```
 it_behaves_like 'return_response_status', 200
 ```
-
-
 
 
 上記コード全体
