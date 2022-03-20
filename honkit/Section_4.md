@@ -30,8 +30,6 @@
 - コントローラーへのリクエストが通ること
 - 期待されるレスポンスが返却されること
 
-**　↑の観点は足りてないかも、、、後で再チェックする**
-
 
 ## Request specの解説
 
@@ -84,11 +82,13 @@ it_behaves_like 'return_response_status', 200
 subject { get posts_url }
 ```
 
-②返却されたレスポンスのボディに投稿の内容とhtmlを含んでいるか確認します。
+②返却されたレスポンスのボディに投稿の内容とhtmlを含んでいるか確認します。  
+response.bodyの内容を検証しています。
 ```
 expect(response.body).to include 'PostRequestTest :Takashiの投稿'
 expect(response.body).to include '<span>投稿者</span>Takashi'
 ```
+
 
 
 
