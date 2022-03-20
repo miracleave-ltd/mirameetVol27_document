@@ -71,10 +71,25 @@ before do
 end
 ```
 
-④リクストが通ることを確認するので、HTTPresposeが200であることが期待値
+④リクストが通ることを確認するので、HTTPレスポンスのステータスが200であることが期待値
 ```
 it_behaves_like 'return_response_status', 200
 ```
+
+次のテスト内容は以下です。
+投稿一覧のレスポンスに適切な投稿内容を含んでいること
+
+①subject(テスト対象のオブジェクト)は先ほどど同じ、投稿一覧のリクエスト処理
+```
+subject { get posts_url }
+```
+
+②返却されたレスポンスのボディに投稿の内容とhtmlを含んでいるか確認します。
+```
+expect(response.body).to include 'PostRequestTest :Takashiの投稿'
+expect(response.body).to include '<span>投稿者</span>Takashi'
+```
+
 
 
 上記コード全体
