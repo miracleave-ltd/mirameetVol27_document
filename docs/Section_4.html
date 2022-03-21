@@ -178,7 +178,7 @@
                 <a href="Section_5.html">
             
                     
-                    5.統合テスト(ST)
+                    5.システムテスト(ST)
             
                 </a>
             
@@ -204,7 +204,7 @@
                 <span>
             
                     
-                    7.まままああああああとめ
+                    7.まとめ
             
                 </a>
             
@@ -258,7 +258,7 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="結合テスト（IT）"><a name="結合テスト（it）" class="plugin-anchor" href="#結合テスト（it）"><i class="fa fa-link" aria-hidden="true"></i></a>結合テスト（IT）</h1>
-<h2 id="本クションで行うこと">1. 本クションで行うこと</h2>
+<h2 id="本セクションで行うこと">1. 本セクションで行うこと</h2>
 <ol>
 <li>今回取り上げる結合テストについて</li>
 <li>Request specの解説</li>
@@ -281,15 +281,61 @@
 <li>コントローラーへのリクエストが通ること</li>
 <li>期待されるレスポンスが返却されること</li>
 </ul>
-<p><strong>　↑の観点は足りてないかも、、、後で再チェックする</strong></p>
 <h2 id="Request_specの解説">3. Request specの解説</h2>
-<p><strong>Request specで出来ること</strong></p>
+<p>Request specを使うと、以下のテストができるようになります。</p>
 <ul>
-<li>リクエストのテストができる</li>
+<li>HTTPリクエストのテストができる</li>
 <li>複数コントローラーの複数のリクエストがテストできる</li>
 <li>複数のセッションでリクエストを指定できる</li>
 </ul>
-<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#結合テスト（IT）">結合テスト（IT）</a></p><li><a href="#本クションで行うこと">1. 本クションで行うこと</a></li><li><a href="#今回取り上げる結合テストについて">2. 今回取り上げる結合テストについて</a></li><li><a href="#Request_specの解説">3. Request specの解説</a></li></ul></div><a href="#本クションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
+<p>以下、Request specファイルの生成コマンド</p>
+<pre><code>rails g rspec:request ファイル名
+</code></pre><p>今回は投稿機能の結合テスト(posts_spec.rb)を例に実際のテストコードを確認していきます。  </p>
+<p>これから説明するテストの内容は、以下です。<br><code>ユーザーがログインしている場合は投稿一覧のリクエストが成功すること</code></p>
+<p>①テストデータとして、ログインユーザーと投稿を生成</p>
+<pre><code>  let(:user) { create(:user, nickname: &apos;Takashi&apos;) }
+  let(:post_instance) { create(:post, user: user, text: &apos;PostRequestTest&apos;, image: &apos;https://example_image_url&apos;) }
+</code></pre><p>②subject(テスト対象のオブジェクト)は、投稿一覧のリクエスト処理<br>Request specでは直接ルーティング名を指定することができます。</p>
+<pre><code>subject { get posts_url }
+</code></pre><p>③テスト前にテストデータのユーザーでログイン処理とlet変数（post_instance）を呼び出しておく</p>
+<pre><code>before do
+    sign_in user
+    post_instance
+end
+</code></pre><p>④リクストが通ることを確認するので、HTTPレスポンスのステータスが200であることが期待値</p>
+<pre><code>it_behaves_like &apos;return_response_status&apos;, 200
+</code></pre><p>次のテスト内容は以下です。<br><code>投稿一覧のレスポンスに適切な投稿内容を含んでいること</code></p>
+<p>①subject(テスト対象のオブジェクト)は先ほどど同じ、投稿一覧のリクエスト処理</p>
+<pre><code>subject { get posts_url }
+</code></pre><p>②返却されたレスポンスのボディに投稿の内容とhtmlを含んでいるか確認します。<br>response.bodyの内容を検証しています。</p>
+<pre><code>expect(response.body).to include &apos;PostRequestTest :Takashiの投稿&apos;
+expect(response.body).to include &apos;&lt;span&gt;投稿者&lt;/span&gt;Takashi&apos;
+</code></pre><p>上記コード全体</p>
+<pre><code>  let(:user) { create(:user, nickname: &apos;Takashi&apos;) }
+  let(:post_instance) { create(:post, user: user, text: &apos;PostRequestTest&apos;, image: &apos;https://example_image_url&apos;) }
+
+  describe &apos;投稿一覧&apos; do
+    subject { get posts_url }
+
+    context &apos;ログインしている場合&apos; do
+      before do
+        sign_in user
+        post_instance
+      end
+
+      it_behaves_like &apos;return_response_status&apos;, 200
+
+      it &apos;レスポンスに適切な投稿内容を含むこと&apos; do
+        subject
+        aggregate_failures do
+          expect(response.body).to include &apos;PostRequestTest :Takashiの投稿&apos;
+          expect(response.body).to include &apos;&lt;span&gt;投稿者&lt;/span&gt;Takashi&apos;
+        end
+      end
+    end
+
+  ~~~~省略~~~~~
+</code></pre><div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#結合テスト（IT）">結合テスト（IT）</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#今回取り上げる結合テストについて">2. 今回取り上げる結合テストについて</a></li><li><a href="#Request_specの解説">3. Request specの解説</a></li></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
                                 
                                 </section>
                             
@@ -321,7 +367,7 @@
                 </a>
                 
                 
-                <a href="Section_5.html" class="navigation navigation-next " aria-label="Next page: 5.統合テスト(ST)">
+                <a href="Section_5.html" class="navigation navigation-next " aria-label="Next page: 5.システムテスト(ST)">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -332,7 +378,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"next":{"title":"5.統合テスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"previous":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"path":"Section_3.md","ref":"Section_3.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_4.md","mtime":"2022-03-16T09:18:13.893Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-16T09:24:36.367Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"next":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"previous":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"path":"Section_3.md","ref":"Section_3.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_4.md","mtime":"2022-03-21T12:56:53.302Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-21T12:57:41.971Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

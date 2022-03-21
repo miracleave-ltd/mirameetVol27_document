@@ -3,7 +3,7 @@
 <html lang="ja" >
     <head>
         <meta charset="UTF-8">
-        <title>5.統合テスト(ST) · mirameet</title>
+        <title>5.システムテスト(ST) · mirameet</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="HonKit 3.7.1">
@@ -178,7 +178,7 @@
                 <a href="Section_5.html">
             
                     
-                    5.統合テスト(ST)
+                    5.システムテスト(ST)
             
                 </a>
             
@@ -204,7 +204,7 @@
                 <span>
             
                     
-                    7.まままああああああとめ
+                    7.まとめ
             
                 </a>
             
@@ -242,7 +242,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="." >5.統合テスト(ST)</a>
+        <a href="." >5.システムテスト(ST)</a>
     </h1>
 </div>
 
@@ -257,10 +257,55 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="統合テスト"><a name="統合テスト" class="plugin-anchor" href="#統合テスト"><i class="fa fa-link" aria-hidden="true"></i></a>統合テスト</h1>
-<h2 id="本クションで行うこと">1. 本クションで行うこと</h2>
-<p>1. </p>
-<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#統合テスト">統合テスト</a></p><li><a href="#本クションで行うこと">1. 本クションで行うこと</a></li></ul></div><a href="#本クションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
+                                <h1 id="システムテスト(ST)"><a name="システムテストst" class="plugin-anchor" href="#システムテストst"><i class="fa fa-link" aria-hidden="true"></i></a>システムテスト(ST)</h1>
+<h2 id="本セクションで行うこと">1. 本セクションで行うこと</h2>
+<ol>
+<li>システムテストについて</li>
+<li>System spec解説</li>
+</ol>
+<h2 id="システムテストについて">2. システムテストについて</h2>
+<p>システムテスト(System Test)は、要件定義書に記載した要件をクリアしているか?、つまりアプリ全体が一つのシステムとして期待される動きをするのか?、　　
+を確認するテストになります。<br>これまで説明した単体テスト、結合テストとは、詳細設計、基本設計で記載した要件をクリアしているかどうかを確認していました。<br>このような形のテストモデルを「V字モデル」と呼びます。</p>
+<p><img width="648" alt="スクリーンショット 2022-03-21 15 34 10" src="https://user-images.githubusercontent.com/52161269/159214576-b1c97d34-531e-42b1-a467-2461a0dc8bfe.png"></p>
+<p>では、実際にシステムテストを行う際はどのようにテストケースを実施すれば良いでしょうか?<br>システムテストの手法としていくつかありますが、今回はシナリオテストを行います。</p>
+<p>シナリオテストは、実際のユーザーの行動をシナリオ化してテストを行います。<br>投稿機能を例に考えてみましょう。  </p>
+<pre><code>投稿機能におけるシステムテスト：
+1. ユーザーは投稿する
+2. ユーザーは投稿の編集をする
+3. ユーザーは投稿の削除をする
+4. ユーザーは自分の投稿にコメントをする
+5. ユーザーは他人の投稿を閲覧し、コメントをする
+6. ...以下省略...
+</code></pre><h2 id="System_spec解説">3. System spec解説</h2>
+<p>Rpsecでは、システムテストとして行うテストをSystem specと呼んでいます。
+System specでは、ユーザーの動きをコードに起こしてテストする為に、「Capybara」と言うgem(ライブラリ）を使います。<br>Capybaraは、Rails5.1以降では標準インストールされています。<br>Capybaraは、指定したページにアクセスしたり、フィールドに入力したり、ボタンをクリックしたり、ブラウザの操作を可能にします。</p>
+<p>先ほどの投稿機能のシステムテストケースを使って、実際のコードを確認していきましょう！</p>
+<p>テスト内容：<code>1. ユーザーは投稿する</code></p>
+<p>①投稿する為にユーザーを用意</p>
+<pre><code>let(:user_a) { create(:user, nickname: &apos;Takashi&apos;) }
+</code></pre><p>②テスト実施前に、ユーザーのログイン処理を行う</p>
+<pre><code>before do
+    sign_in_as user_a
+  end
+</code></pre><p>③テスト対象は<code>ユーザーは投稿する</code>なので、Capybaraのメソッドでブラウザ操作して投稿処理をする  </p>
+<pre><code>click_link_or_button &apos;投稿する&apos;
+fill_in &apos;post_text&apos;, with: &apos;sample_text&apos;
+click_button &apos;commit&apos;
+
+post = Post.find_by_text_and_user_id(&apos;sample_text :Takashiの投稿&apos;, user_a.id)
+</code></pre><p>上記では、「投稿する」ボタンを押下して遷移先で、&quot;sanple_text&quot;と投稿欄に入力して、投稿ボタンを押下しています。</p>
+<p><strong>Capybaraメソッド</strong><br><code>click_link_or_button　&apos;対象要素のIDやテキスト&apos;</code>・・・指定したボタンもしくはリンクを探してクリックする。<br><code>fill_in &apos;対象要素のnameやID&apos;, with: &apos;フィールドに入力する文字&apos;</code>・・・指定した要素を探して、with以降で指定した文字を入力する。<br><code>click_button　&apos;対象要素のIDやname&apos;</code>・・・指定したボタンを探してクリックする。  </p>
+<p>④テスト対象（③）に対して、遷移先のパスが合っているか、投稿した内容を表示しているか、スラック通知処理はできているかを確認</p>
+<pre><code>aggregate_failures do
+  expect(current_path).to eq posts_path
+  expect(page).to have_content &apos;sample_text&apos;
+  expect {
+    SlackSyncJob.perform_later(post)
+  }.to have_enqueued_job.with(post)
+end
+</code></pre><p><strong>Capybaraメソッド</strong><br><code>current_path</code>・・・現在表示しているページのパスを返す。<br><code>page</code>・・・現在表示しているページのオブジェクト。</p>
+<p>補足：<code>aggregate_failures do...end</code>は、これで囲まれたexpectは、expectの評価で失敗しても次のexpectを実行することができるようになります。これまでのRSpecだと、一つのexampleにつき複数のexpectで書くと失敗した時にそれ以降のexpectが実行されませんでしたが、これにより一つのexpamleに複数のexpectを書くことが出来ます。</p>
+<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#システムテスト(ST)">システムテスト(ST)</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#システムテストについて">2. システムテストについて</a></li><li><a href="#System_spec解説">3. System spec解説</a></li></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
                                 
                                 </section>
                             
@@ -303,7 +348,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"5.統合テスト(ST)","level":"1.6","depth":1,"next":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"path":"Section_6.md","ref":"Section_6.md","articles":[]},"previous":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_5.md","mtime":"2022-03-08T12:28:41.960Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-16T09:24:36.367Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"next":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"path":"Section_6.md","ref":"Section_6.md","articles":[]},"previous":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_5.md","mtime":"2022-03-21T12:56:53.304Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-21T12:57:41.971Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
