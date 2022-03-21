@@ -55,26 +55,37 @@ before do
 
 ③テスト対象は`ユーザーは投稿する`なので、Capybaraのメソッドでブラウザ操作して投稿処理をする  
 ```
-expect {
-        click_link_or_button '投稿する'
-        fill_in 'post_text', with: 'sample_text'
-        click_button 'commit'
+click_link_or_button '投稿する'
+fill_in 'post_text', with: 'sample_text'
+click_button 'commit'
 
-        post = Post.find_by_text_and_user_id('sample_text :Takashiの投稿', user_a.id)
+post = Post.find_by_text_and_user_id('sample_text :Takashiの投稿', user_a.id)
+```
 
-        aggregate_failures do
-          expect(current_path).to eq posts_path
-          expect(page).to have_content 'sample_text'
-          expect {
-            SlackSyncJob.perform_later(post)
-          }.to have_enqueued_job.with(post)
-        end
-      }
+上記では、「投稿する」ボタンを押下して遷移先で、"sanple_text"と投稿欄に入力して、投稿ボタンを押下しています。
+
+**Capybaraメソッド**  
+`click_link_or_button　'対象要素のIDやテキスト'`・・・指定したボタンもしくはリンクを探してクリックする。  
+`fill_in '対象要素のnameやID', with: 'フィールドに入力する文字'`・・・指定した要素を探して、with以降で指定した文字を入力する。  
+`click_button　'対象要素のIDやname'`・・・指定したボタンを探してクリックする。  
+
+④テスト対象（③）に対して、遷移先のパスが合っているか、投稿した内容を表示しているか、スラック通知処理はできているかを確認
+```
+aggregate_failures do
+  expect(current_path).to eq posts_path
+  expect(page).to have_content 'sample_text'
+  expect {
+    SlackSyncJob.perform_later(post)
+  }.to have_enqueued_job.with(post)
+end
 ```
 
 **Capybaraメソッド**  
-`click_link_or_button　'ボタン名orID名'`・・・文字列で指定したボタンもしくはリンクを探してクリックする。  
-`fill_in '', with: ''`・・・
+`current_path`・・・現在表示しているページのパスを返す。  
+`page`・・・現在表示しているページのオブジェクト。
+
+補足：`aggregate_failures do...end`は、これで囲まれたexpectは、expectの評価で失敗しても次のexpectを実行することができるようになります。これまでのRSpecだと、一つのexampleにつき複数のexpectで書くと失敗した時にそれ以降のexpectが実行されませんでしたが、これにより一つのexpamleに複数のexpectを書くことが出来ます。
+
 
 
 
