@@ -3,7 +3,7 @@
 <html lang="ja" >
     <head>
         <meta charset="UTF-8">
-        <title>2.RSpecの概要解説 · mirameet</title>
+        <title>7.まとめ · mirameet</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="HonKit 3.7.1">
@@ -76,10 +76,8 @@
     <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="Section_3.html" />
     
-    
-    <link rel="prev" href="Section_1.html" />
+    <link rel="prev" href="Section_6.html" />
     
 
     </head>
@@ -134,7 +132,7 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.3" data-path="Section_2.html">
+        <li class="chapter " data-level="1.3" data-path="Section_2.html">
             
                 <a href="Section_2.html">
             
@@ -199,7 +197,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.8" data-path="Section_7.html">
+        <li class="chapter active" data-level="1.8" data-path="Section_7.html">
             
                 <a href="Section_7.html">
             
@@ -242,7 +240,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="." >2.RSpecの概要解説</a>
+        <a href="." >7.まとめ</a>
     </h1>
 </div>
 
@@ -257,53 +255,8 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="RSpecの概要解説"><a name="rspecの概要解説" class="plugin-anchor" href="#rspecの概要解説"><i class="fa fa-link" aria-hidden="true"></i></a>RSpecの概要解説</h1>
-<h2 id="本セクションで行うこと">1. 本セクションで行うこと</h2>
-<ol>
-<li>RSpecとは何か</li>
-<li>RSpecのメリット・デメリット</li>
-<li>RSpecでできること</li>
-</ol>
-<h2 id="RSpecとは？">2. RSpecとは？</h2>
-<p>突然ですが、皆さんの開発現場ではテストはどのように実施されてますか？  </p>
-<p><img src="https://user-images.githubusercontent.com/52161269/157041610-880f46a7-5bc7-4366-bdec-9982b269fa74.png" alt="image"></p>
-<p>私が経験した現場では、色々なテストの形がありました。<br>動作確認≒テストになっている、エクセルにエビデンスのキャプチャを張って行うレガシーなテスト、テストコードを書いて行う自動テスト、、、、、など現場によって様々です。</p>
-<p><a href="https://relishapp.com/rspec/" target="_blank">公式ドキュメント</a>よりRSpecについて下記のように説明されています。</p>
-<pre><code>RSpec is a Behaviour-Driven Development tool for Ruby programmers. BDD is an approach
-to software development that combines Test-Driven Development, Domain Driven Design,
-and Acceptance Test-Driven Planning. RSpec helps you do the TDD part of that equation,
-focusing on the documentation and design aspects of TDD.
-</code></pre><p>一言で言うと、<br><strong>RSpecは、（Rubyプログラマー為の）BDDツールである。</strong>  </p>
-<p>BDD・・・振る舞い駆動開発(Behaviour-Driven Development)のこと。TDD（テスト駆動開発）から派生した開発手法。BDDでは実装前に要求される振る舞い(≒仕様)をテストに書き出してから実装し、また、要求される振る舞いは自然言語(英語など)に近い形で表現されます。</p>
-<p>RailsプロジェクトでRSpecを利用するには「rspec-rails」というライブラリ（gem）のインストールが必要になります。</p>
-<h2 id="RSpecのメリット・デメリット">3. RSpecのメリット・デメリット</h2>
-<p>RSpecを導入することで、以下のようなメリットがあります。</p>
-<p><strong>メリット</strong></p>
-<ul>
-<li>テストのコストが抑えられる<br>例）エクセルにテスト仕様書を書き出す場合、、、<br><img width="727" alt="スクリーンショット 2022-03-13 17 35 51" src="https://user-images.githubusercontent.com/52161269/158051703-e4f4a393-bbfe-49ab-962e-fb40a1774bc3.png">
-  RSpecを利用すると、テスト実施はRSpecが行う
-<img width="780" alt="スクリーンショット 2022-03-13 17 36 34" src="https://user-images.githubusercontent.com/52161269/158051719-0c63b87e-37d9-4637-8272-f731c45ec10d.png"></li>
-</ul>
-<ul>
-<li>誰がやっても同じテストが実施される為、テストのQAが安定する</li>
-<li><p>テスト実施や仕様書の工数を削減できる（中長期なメリット）<br>一度テストコードを書くと、その後の追加開発時で既存プログラムへのテスト工数が以下のように削減できる
-<img width="786" alt="スクリーンショット 2022-03-13 17 34 52" src="https://user-images.githubusercontent.com/52161269/158051677-27cbc6fa-d08a-45ee-a41c-43b9d93754e3.png"></p>
-</li>
-<li><p>追加開発時のデグレ発生を防止できる（中長期なメリット）</p>
-</li>
-</ul>
-<p><strong>デメリット</strong></p>
-<ul>
-<li>RSpecの学習コストが必要</li>
-<li>開発時にテストコードも書くので、開発自体の工数が増加する</li>
-</ul>
-<h2 id="RSpecでできること">4. RSpecでできること</h2>
-<ul>
-<li>単体テストができる</li>
-<li>結合テストができる</li>
-<li>システムテストができる</li>
-</ul>
-<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#RSpecの概要解説">RSpecの概要解説</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#RSpecとは？">2. RSpecとは？</a></li><li><a href="#RSpecのメリット・デメリット">3. RSpecのメリット・デメリット</a></li><li><a href="#RSpecでできること">4. RSpecでできること</a></li></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
+                                <h1 id="　まとめ"><a name="　まとめ" class="plugin-anchor" href="#　まとめ"><i class="fa fa-link" aria-hidden="true"></i></a>　まとめ</h1>
+
                                 
                                 </section>
                             
@@ -330,14 +283,10 @@ focusing on the documentation and design aspects of TDD.
 
             
                 
-                <a href="Section_1.html" class="navigation navigation-prev " aria-label="Previous page: 1.本日のミートアップの内容">
+                <a href="Section_6.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: 6.AWS CodeBuildでビルドを実行しみよう！">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
-                
-                <a href="Section_3.html" class="navigation navigation-next " aria-label="Next page: 3.単体テスト(UT)">
-                    <i class="fa fa-angle-right"></i>
-                </a>
                 
             
         
@@ -346,7 +295,7 @@ focusing on the documentation and design aspects of TDD.
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"2.RSpecの概要解説","level":"1.3","depth":1,"next":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"path":"Section_3.md","ref":"Section_3.md","articles":[]},"previous":{"title":"1.本日のミートアップの内容","level":"1.2","depth":1,"path":"Section_1.md","ref":"Section_1.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_2.md","mtime":"2022-03-21T13:13:23.445Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-21T13:24:32.858Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"7.まとめ","level":"1.8","depth":1,"previous":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"path":"Section_6.md","ref":"Section_6.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_7.md","mtime":"2022-03-21T13:23:13.612Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-21T13:24:32.858Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
