@@ -86,7 +86,37 @@ end
 
 補足：`aggregate_failures do...end`は、これで囲まれたexpectは、expectの評価で失敗しても次のexpectを実行することができるようになります。これまでのRSpecだと、一つのexampleにつき複数のexpectで書くと失敗した時にそれ以降のexpectが実行されませんでしたが、これにより一つのexpamleに複数のexpectを書くことが出来ます。
 
+①〜④のコード全体
+```
+  let(:user_a) { create(:user, nickname: 'Takashi') }
+  let(:user_b) { create(:user, nickname: 'Satoshi') }
+  let!(:post) { create(:post, text: 'hello world', user: user_a)}
+  before do
+    sign_in_as user_a
+  end
 
+  describe '投稿の作成' do
+    scenario 'ユーザーは新しい投稿を作成する' do
+      ActiveJob::Base.queue_adapter = :test
+
+      expect {
+        click_link_or_button '投稿する'
+        fill_in 'post_text', with: 'sample_text'
+        click_button 'commit'
+
+        post = Post.find_by_text_and_user_id('sample_text :Takashiの投稿', user_a.id)
+
+        aggregate_failures do
+          expect(current_path).to eq posts_path
+          expect(page).to have_content 'sample_text'
+          expect {
+            SlackSyncJob.perform_later(post)
+          }.to have_enqueued_job.with(post)
+        end
+      }.to change(user_a.posts, :count).by(1)
+    end
+    
+    ~~以下省略~~
 
 
 
