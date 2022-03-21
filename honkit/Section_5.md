@@ -116,7 +116,8 @@ end
       }.to change(user_a.posts, :count).by(1)
     end
     
-    ~~以下省略~~
+~~以下省略~~
+```
 
 
 
