@@ -1,4 +1,4 @@
-# 6. AWS CodeBuildでテスト＆ビルドする
+# AWS CodeBuildでテスト＆ビルドする
 
 ## 本セクションで行うこと
 - AWS CodeBuildの解説
