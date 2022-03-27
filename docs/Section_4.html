@@ -262,7 +262,6 @@
 <ol>
 <li>今回取り上げる結合テストについて</li>
 <li>Request specの解説</li>
-<li>本アプリでの実例紹介（後で変更するかも）</li>
 </ol>
 <h2 id="今回取り上げる結合テストについて">2. 今回取り上げる結合テストについて</h2>
 <p>結合テストは、Integration Test(統合テスト)とも呼ばれ、システム開発において単体レベルで開発した機能が組み合わさって動作した時、期待される動作をするかどうかをテストします。<br>結合テストは、実施する対象によって内部結合・外部結合に分かれます。  </p>
@@ -281,7 +280,6 @@
 <li>コントローラーへのリクエストが通ること</li>
 <li>期待されるレスポンスが返却されること</li>
 </ul>
-<h3 id="＜自分用メモ＞テスト内容のくだりを追加する！！">2.1. ＜自分用メモ＞テスト内容のくだりを追加する！！</h3>
 <h2 id="Request_specの解説">3. Request specの解説</h2>
 <p>Request specを使うと、以下のテストができるようになります。</p>
 <ul>
@@ -291,28 +289,65 @@
 </ul>
 <p>以下、Request specファイルの生成コマンド</p>
 <pre><code>rails g rspec:request ファイル名
-</code></pre><p>今回は投稿機能の結合テスト(posts_spec.rb)を例に実際のテストコードを確認していきます。  </p>
-<p>これから説明するテストの内容は、以下です。<br><code>ユーザーがログインしている場合は投稿一覧のリクエストが成功すること</code></p>
-<p>①テストデータとして、ログインユーザーと投稿を生成</p>
-<pre><code>  let(:user) { create(:user, nickname: &apos;Takashi&apos;) }
+</code></pre><p>投稿機能の結合テスト(posts_spec.rb)を例に実際のテストコードを確認していきます。  </p>
+<pre><code>require &apos;rails_helper&apos;
+
+RSpec.describe &apos;Posts&apos;, type: :request do
+~~~~~~~~~~~①~~~~~~~~~~~~
+  let(:user) { create(:user, nickname: &apos;Takashi&apos;) }
   let(:post_instance) { create(:post, user: user, text: &apos;PostRequestTest&apos;, image: &apos;https://example_image_url&apos;) }
-</code></pre><p>②subject(テスト対象のオブジェクト)は、投稿一覧のリクエスト処理<br>Request specでは直接ルーティング名を指定することができます。</p>
-<pre><code>subject { get posts_url }
-</code></pre><p>③テスト前にテストデータのユーザーでログイン処理とlet変数（post_instance）を呼び出しておく</p>
-<pre><code>before do
-    sign_in user
-    post_instance
+~~~~~~~~~~~①~~~~~~~~~~~~
+
+  describe &apos;投稿一覧&apos; do
+~~~~~~~~~~~②~~~~~~~~~~~~
+    subject { get posts_url }
+~~~~~~~~~~~②~~~~~~~~~~~~
+
+    context &apos;ログインしている場合&apos; do
+~~~~~~~~~~~③~~~~~~~~~~~~
+      before do
+        sign_in user
+        post_instance
+      end
+~~~~~~~~~~~③~~~~~~~~~~~~
+
+~~~~~~~~~~~④~~~~~~~~~~~~
+      it_behaves_like &apos;return_response_status&apos;, 200
+~~~~~~~~~~~④~~~~~~~~~~~~
+
+
+      it &apos;レスポンスに適切な投稿内容を含むこと&apos; do
+        subject
+        aggregate_failures do
+          expect(response.body).to include &apos;PostRequestTest :Takashiの投稿&apos;
+          expect(response.body).to include &apos;&lt;span&gt;投稿者&lt;/span&gt;Takashi&apos;
+        end
+      end
+    end
+
+
+  ~~~~省略~~~~~
+</code></pre><hr>
+<h5 id="3_1_ユーザーがログインしている場合は投稿一覧のリクエストが成功すること"><a name="31-ユーザーがログインしている場合は投稿一覧のリクエストが成功すること" class="plugin-anchor" href="#31-ユーザーがログインしている場合は投稿一覧のリクエストが成功すること"><i class="fa fa-link" aria-hidden="true"></i></a>3.1 ユーザーがログインしている場合は投稿一覧のリクエストが成功すること</h5>
+<p>①テストデータとして、ログインユーザーと投稿を生成<br>②subject(テスト対象のオブジェクト)は、投稿一覧のリクエスト処理<br>　Request specでは直接ルーティング名を指定することができます。<br>③テスト前にテストデータのユーザーでログイン処理とlet変数（post_instance）を呼び出しておく<br>④リクエストが通ることを確認するので、HTTPレスポンスのステータスが200であることが期待値<br><code>it_behaves_like</code>は、新しいコンテキスト(context &apos;xxx&apos;do ... endのこと)を自動生成して、そこにテストケースを埋め込みます。<br><code>return_response_status</code>は、同じテストコードの重複を避けるために`shared_examples｀を使ってまとめています。<br>中身のテストコードは、別ファイルで定義しています。</p>
+<pre><code>RSpec.shared_examples &apos;return_response_status&apos; do |status_no|
+  it &quot;#{status_no}レスポンスを返すこと&quot; do
+    subject
+    expect(response.status).to eq status_no
+  end
 end
-</code></pre><p>④リクエストが通ることを確認するので、HTTPレスポンスのステータスが200であることが期待値</p>
-<pre><code>it_behaves_like &apos;return_response_status&apos;, 200
-</code></pre><p>次のテスト内容は以下です。<br><code>投稿一覧のレスポンスに適切な投稿内容を含んでいること</code></p>
-<p>①subject(テスト対象のオブジェクト)は先ほどと同じ、投稿一覧のリクエスト処理</p>
-<pre><code>subject { get posts_url }
-</code></pre><p>②返却されたレスポンスのボディに投稿の内容とhtmlを含んでいるか確認します。<br>response.bodyの内容を検証しています。</p>
-<pre><code>expect(response.body).to include &apos;PostRequestTest :Takashiの投稿&apos;
-expect(response.body).to include &apos;&lt;span&gt;投稿者&lt;/span&gt;Takashi&apos;
-</code></pre><p>上記コード全体</p>
-<pre><code>  let(:user) { create(:user, nickname: &apos;Takashi&apos;) }
+</code></pre><p><code>shared_examples</code>なしのコード：</p>
+<pre><code>context &apos;behaves like a return_response_status&apos; do
+    it &quot;200レスポンスを返すこと&quot; do
+        expect(response.status).to eq 200
+    end
+end
+</code></pre><hr>
+<h5 id="3_2_投稿一覧のレスポンスに適切な投稿内容を含んでいること"><a name="32-投稿一覧のレスポンスに適切な投稿内容を含んでいること" class="plugin-anchor" href="#32-投稿一覧のレスポンスに適切な投稿内容を含んでいること"><i class="fa fa-link" aria-hidden="true"></i></a>3.2 投稿一覧のレスポンスに適切な投稿内容を含んでいること</h5>
+<pre><code>require &apos;rails_helper&apos;
+
+RSpec.describe &apos;Posts&apos;, type: :request do
+  let(:user) { create(:user, nickname: &apos;Takashi&apos;) }
   let(:post_instance) { create(:post, user: user, text: &apos;PostRequestTest&apos;, image: &apos;https://example_image_url&apos;) }
 
   describe &apos;投稿一覧&apos; do
@@ -326,17 +361,25 @@ expect(response.body).to include &apos;&lt;span&gt;投稿者&lt;/span&gt;Takashi
 
       it_behaves_like &apos;return_response_status&apos;, 200
 
+
       it &apos;レスポンスに適切な投稿内容を含むこと&apos; do
+~~~~~~~~~~~①~~~~~~~~~~~~
         subject
+~~~~~~~~~~~①~~~~~~~~~~~~
         aggregate_failures do
+~~~~~~~~~~~②~~~~~~~~~~~~
           expect(response.body).to include &apos;PostRequestTest :Takashiの投稿&apos;
           expect(response.body).to include &apos;&lt;span&gt;投稿者&lt;/span&gt;Takashi&apos;
+~~~~~~~~~~~②~~~~~~~~~~~~
         end
       end
     end
 
+
   ~~~~省略~~~~~
-</code></pre><div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#結合テスト（IT）">結合テスト（IT）</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#今回取り上げる結合テストについて">2. 今回取り上げる結合テストについて</a></li><ul><li><a href="#＜自分用メモ＞テスト内容のくだりを追加する！！">2.1. ＜自分用メモ＞テスト内容のくだりを追加する！！</a></li></ul><li><a href="#Request_specの解説">3. Request specの解説</a></li></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
+</code></pre><p>①subject(テスト対象のオブジェクト)は先ほどと同じ、投稿一覧のリクエスト処理</p>
+<p>②返却されたレスポンスのボディに投稿の内容とhtmlを含んでいるか確認します。<br>response.bodyの内容を検証しています。</p>
+<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#結合テスト（IT）">結合テスト（IT）</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#今回取り上げる結合テストについて">2. 今回取り上げる結合テストについて</a></li><li><a href="#Request_specの解説">3. Request specの解説</a></li></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
                                 
                                 </section>
                             
@@ -379,7 +422,7 @@ expect(response.body).to include &apos;&lt;span&gt;投稿者&lt;/span&gt;Takashi
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"next":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"previous":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"path":"Section_3.md","ref":"Section_3.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_4.md","mtime":"2022-03-27T11:05:15.357Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-27T11:07:51.329Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"next":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"previous":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"path":"Section_3.md","ref":"Section_3.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_4.md","mtime":"2022-03-27T13:02:31.168Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-27T13:04:33.045Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
