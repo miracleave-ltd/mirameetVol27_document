@@ -94,7 +94,7 @@ RSpec.describe 'Posts', type: :request do
 ③テスト前にテストデータのユーザーでログイン処理とlet変数（post_instance）を呼び出しておく  
 ④リクエストが通ることを確認するので、HTTPレスポンスのステータスが200であることが期待値  
 `it_behaves_like`は、新しいコンテキスト(context 'xxx'do ... endのこと)を自動生成して、そこにテストケースを埋め込みます。  
-`return_response_status`は、同じテストコードの重複を避けるために`shared_examples｀を使ってまとめています。  
+`return_response_status`は、同じテストコードの重複を避けるために`shared_examples`を使ってまとめています。  
 中身のテストコードは、別ファイルで定義しています。
 ```
 RSpec.shared_examples 'return_response_status' do |status_no|
