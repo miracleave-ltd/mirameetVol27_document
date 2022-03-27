@@ -42,15 +42,16 @@ RSpecを導入することで、以下のようなメリットがあります。
 例）エクセルにテスト仕様書を書き出す場合、、、  
 <img width="727" alt="スクリーンショット 2022-03-13 17 35 51" src="https://user-images.githubusercontent.com/52161269/158051703-e4f4a393-bbfe-49ab-962e-fb40a1774bc3.png">
     RSpecを利用すると、テスト実施はRSpecが行う
-<img width="780" alt="スクリーンショット 2022-03-13 17 36 34" src="https://user-images.githubusercontent.com/52161269/158051719-0c63b87e-37d9-4637-8272-f731c45ec10d.png">
+<img width="779" alt="スクリーンショット 2022-03-27 19 09 14" src="https://user-images.githubusercontent.com/52161269/160276619-ecfa6be6-b2a8-436c-aa80-8de191d39665.png">
 
 
-- 誰がやっても同じテストが実施される為、テストのQAが安定する
 - テスト実施や仕様書の工数を削減できる（中長期なメリット）  
 一度テストコードを書くと、その後の追加開発時で既存プログラムへのテスト工数が以下のように削減できる
-<img width="786" alt="スクリーンショット 2022-03-13 17 34 52" src="https://user-images.githubusercontent.com/52161269/158051677-27cbc6fa-d08a-45ee-a41c-43b9d93754e3.png">
+<img width="777" alt="スクリーンショット 2022-03-27 19 10 45" src="https://user-images.githubusercontent.com/52161269/160276657-de387b65-0fa9-4200-ae5d-4e5c835b58e9.png">
+
 
 - 追加開発時のデグレ発生を防止できる（中長期なメリット）
+- 誰がやっても同じテストが実施される為、テストのQAが安定する
 
 
 **デメリット**
