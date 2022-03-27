@@ -74,14 +74,10 @@ RSpec.describe 'Posts', type: :request do
       
 
       it 'レスポンスに適切な投稿内容を含むこと' do
-~~~~~~~~~~~⑤~~~~~~~~~~~~
         subject
-~~~~~~~~~~~⑤~~~~~~~~~~~~
         aggregate_failures do
-~~~~~~~~~~~⑥~~~~~~~~~~~~
           expect(response.body).to include 'PostRequestTest :Takashiの投稿'
           expect(response.body).to include '<span>投稿者</span>Takashi'
-~~~~~~~~~~~⑥~~~~~~~~~~~~
         end
       end
     end
@@ -99,12 +95,21 @@ RSpec.describe 'Posts', type: :request do
 ④リクエストが通ることを確認するので、HTTPレスポンスのステータスが200であることが期待値  
 `it_behaves_like`は、新しいコンテキスト(context 'xxx'do ... endのこと)を自動生成して、そこにテストケースを埋め込みます。  
 `return_response_status`は、同じテストコードの重複を避けるために`shared_examples｀を使ってまとめています。  
+中身のテストコードは、別ファイルで定義しています。
+```
+RSpec.shared_examples 'return_response_status' do |status_no|
+  it "#{status_no}レスポンスを返すこと" do
+    subject
+    expect(response.status).to eq status_no
+  end
+end
+```
 
 `shared_examples`なしのコード：
 ```
 context 'behaves like a return_response_status' do
     it "200レスポンスを返すこと" do
-        it_behaves_like expect(response.status).to eq 200
+        expect(response.status).to eq 200
     end
 end
 ```
