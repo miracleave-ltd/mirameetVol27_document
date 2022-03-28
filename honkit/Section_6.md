@@ -74,10 +74,10 @@ CodebuildはVPC内に設置することも可能なので、同じVPC内にRDS�
 ビルドプロジェクトでVPCを指定する必要があるので、事前にVPC・サブネット・RDSを作成しておきましょう。  
 AWS Codebuildのビルドプロジェクトの作成画面です。
 
-![スクリーンショット 2022-03-06 21 45 21](https://user-images.githubusercontent.com/52161269/156923853-9b0e6438-74fc-46dc-9cef-fe34e57a9a06.png)  
- - プロジェクト名・・・ プロジェクト名を指定する（今回はmirameetVol28)
-
-![スクリーンショット 2022-03-06 21 47 48](https://user-images.githubusercontent.com/52161269/156923973-e0f640e9-7487-46a1-ad83-ac1ff015b7d8.png)  
+![スクリーンショット 2022-03-28 15 43 07](https://user-images.githubusercontent.com/52161269/160341003-33a70d0e-9a81-46aa-a87f-0f753e34a2c5.png)
+- プロジェクト名・・・ プロジェクト名を指定する（今回はmirameetVol27)
+  
+![スクリーンショット 2022-03-28 15 44 49](https://user-images.githubusercontent.com/52161269/160341256-61fa7819-164b-43b3-a197-855e81a8c67d.png)
 - ソースプロバイダ・・・GitHubやBitbucketなど　ソース共有ツールを指定する（今回はGitHub)
  - リポジトリ・・・ソースのリポジトリの種別（PublicリポジトリかPrivateリポジトリか）を選択（今回のmirameetVol28はパブリックリポジトリ）
  - GitHubリポジトリ・・・対象のリポジトリを選択
