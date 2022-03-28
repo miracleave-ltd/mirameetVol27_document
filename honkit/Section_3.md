@@ -995,8 +995,256 @@ email形式やurl形式のデータを簡単に作成してくれるため、非
 https://github.com/faker-ruby/faker
 
 
+### 外部APIテスト
+
+今回のアプリではスラックと連携しており、投稿したときに自動的にスラックのチャネルにチャットを投下する機能があります。
+
+- メッセージを投下する(Post.create）
+- Postモデルの`after_save :start_slack_sync`が呼ばれてjobが実行される
+- jobがPostモデルの`slack_sync!`メソッドを呼び出す。
+- `Slack::SendPostService`の`send_post`メソッドが実行されてスラックにメッセージを投下する。
+
+という流れです。
+今回は外部APIテストとして`Slack::SendPostService`のテストを実装します。
+
+※詳細は割愛しますが、スラックに連携する際に`slack-notifier`というライブラリを使用しています。詳しく知りたい方は下記を参考にしてください。
+https://github.com/slack-notifier/slack-notifier
+
+#### VCRの導入
+
+外部APIの連携テストの際はスタブを使用することが多いと思います。
+簡単にスタブを作成できるVCRというライブラリがあるのでご紹介します。
+
+ではまずは導入していきます。
+
+Gemfile
+```ruby
+group :test do
+
+  ## 省略
+  
+  gem 'webmock'
+  gem 'vcr'
+end
+```
+
+VCRを使用する際は内部的にwebmockというライブラリも使用するため、一緒にインストールします。
+
+ターミナル
+```ruby
+bundle install
+```
+
+spec_helper.rbを編集して設定を記述していきます。
+
+spec/spec_helper.rb
+```ruby
+require 'vcr'
+require 'webmock'
+
+RSpec.configure do |config|
+ ## 省略
+end
+
+VCR.configure do |c|
+  c.cassette_library_dir = 'spec/vcr'
+  c.hook_into :webmock
+  c.configure_rspec_metadata!
+end
+```
+
+これで準備が整いました！
+
+ではテストを実装していきます。
+
+今回テストする処理は`app/servise/slack`配下の`send_post_service.rb`というファイルです。
+そのため、テストは`spec/servise/send_post_service_spec.rb`に作成します。
+
+```ruby
+require 'rails_helper'
+
+describe Slack::SendPostService do
+  describe 'slack alignment' do
+    context "#send_post" do
+      it 'post to slack' do
+      
+      ## テストを書く
+      
+      end
+    end
+  end
+end
+
+```
+
+まずは上記のように外枠を書いてみました。
+テストする箇所は`describe Slack::SendPostService do`として明示しています。
+テストする内容は`describe 'slack alignment' do`としていて、スラックとの連携テストだよと記載しています。
+`context "#send_post" do`では`send_post`メソッドのテストを実装することを示しています。
+あるメソッドをテストする時は、慣習的に`#メソッド名`とすることが多いです。
+最後にexampleを`it 'post to slack' do`としています。
+
+では実際にexampleの中身を書いていきましょう。
+その前に簡単にSendPostServiceの中身を見てみましょう。
+
+```ruby
+module  Slack
+  class SendPostService
+
+    def initialize(user_name)
+      webhook_url = ENV['SLACK_WEBHOOK_URL']
+      channel = "##{ENV['CHANNEL_NAME']}"
+      @client ||= Slack::Notifier.new(webhook_url, channel: channel, username: user_name)
+    end
+
+    def send_post(message)
+      @client.ping(message)
+    end
+  end
+end
+```
+
+`Slack::SendPostService`をinitializeするときにuserのnicknameを引数に取り、`@client`をを作成します。
+これは先ほどの`slack-notifier`ライブラリを使用していますが、`Slack::Notifier.new`インスタンスであり、
+引数にスラックのwebhook_url、メッセージを投下するチャンネル名、そしてusernameを指定しています。
+
+そしてこの`@client`に`ping`メソッドを使用すると、該当のスラックのチャンネルにメッセージを投下するという仕組みです。
+
+それを踏まえてテストを実装すると下記のようになります。
+
+```ruby
+it 'post to slack', :vcr do
+  response = Slack::SendPostService.new('user_nickname').send_post('test_message')
+  expect(response.first.message).to eq("OK")
+end
+```
+
+まず、`response = Slack::SendPostService.new('user_nickname').send_post('test_message')`で`Slack::SendPostService`のインスタンスを作成して、`send_post`メソッドを呼び出しています。これでスラックにメッセージを投下することができます。
+
+投下した後はAPIからレスポンスが返されるため、それを`response`に代入しています。
+
+メッセージの投下が成功すれば`response`の中に"OK"というメッセージが含まれるはずなので`expect(response.first.message).to eq("OK")`として検証をしています。
+
+ではテストを実行してみましょう。
+（事前にSlack APIの設定およびenvファイルの作成と環境変数の設定が必要です）
+
+ターミナル
+```ruby
+ rspec spec/service/send_post_service_spec.rb 
+```
+
+正常に終了すれば下記のようなログが出ると思います。
+```ruby
+Slack::SendPostService
+  slack alignment
+    #send_post
+      post to slack
+
+Finished in 0.52359 seconds (files took 4.99 seconds to load)
+1 example, 0 failures
+```
+
+お気づきの方もいらっしゃるかもしれませんが、先ほどのexampleを作成したときに、`:vcr`と記述しています。
+
+```ruby
+it 'post to slack', :vcr do
+  response = Slack::SendPostService.new('user_nickname').send_post('test_message')
+  expect(response.first.message).to eq("OK")
+end
+```
+
+`it 'post to slack', :vcr do`の箇所です。こうすることでvcrを使用することができます。
+この状態でテストを実行すると、spec配下に`vcr/Slack_SendPostService/slack_alignment/_send_post/post_to_slack.yml`というファイルが自動生成されると思います。
+
+中身はこのようになっています。
+```ruby
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://hooks.slack.com/services/*************
+    body:
+      encoding: US-ASCII
+      string: payload=***************
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+      Content-Type:
+      - application/x-www-form-urlencoded
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Mon, 28 Mar 2022 09:25:14 GMT
+      Server:
+      - Apache
+      X-Powered-By:
+      - HHVM/4.153.0
+      X-Frame-Options:
+      - SAMEORIGIN
+      Access-Control-Allow-Origin:
+      - "*"
+      Referrer-Policy:
+      - no-referrer
+      X-Slack-Backend:
+      - r
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept-Encoding
+      Content-Length:
+      - '22'
+      Content-Type:
+      - text/html
+      X-Envoy-Upstream-Service-Time:
+      - '192'
+      X-Backend:
+      - main_normal main_bedrock_normal_with_overflow main_canary_with_overflow main_bedrock_canary_with_overflow
+        main_control_with_overflow main_bedrock_control_with_overflow
+      X-Server:
+      - slack-www-hhvm-main-iad-98d1
+      X-Slack-Shared-Secret-Outcome:
+      - no-match
+      Via:
+      - envoy-www-iad-9tfu, envoy-edge-nrt-3w6t
+      X-Edge-Backend:
+      - envoy-www
+      X-Slack-Edge-Shared-Secret-Outcome:
+      - no-match
+    body:
+      encoding: ASCII-8BIT
+      string: ok
+  recorded_at: Mon, 28 Mar 2022 09:25:14 GMT
+recorded_with: VCR 6.0.0
+
+```
+
+これはテストを実行した際に、スラックAPIを実際に叩いて通信をしていて、その時のリクエストとレスポンスをymlファイルとしてまとめたものになります。
+このファイルが作成された後にもう一度テストすると、今度はスラックAPIを叩くことなく、このファイルをもとにレスポンスを返してくれます。
+
+つまり、VCRは、初回のみ実際にAPIにリクエストを行い、そのリクエストと、レスポンスをもとにymlファイルを自動生成し、以降のテストはそれをスタブとして値を返すというものです。
+そのため、テストのたびに余計なリクエストを投げることがなくなります。
+
+また、自分でスタブを実装する必要がなく、自動で生成してくれるため非常に便利です。
+
+ただし、初回だけ通信が必要になるため、その通信環境が整っていなかったり、何かしらの理由でリクエストが失敗してしまったりすると、その状態でymlファイルを作成してしまうため、
+正しくテストができない可能性があります。その場合は従来通りwebmock等を使用したスタブを自身で作成することを検討する必要があります。
+
+何かしらの理由で想定外のレスポンスが返ってきた場合、vcrディレクトリを削除して再度実施すれば、もう一度実際にリクエストをしてファイルを自動生成してくれます。
 
 
-外部APIテスト
-vcrの使用方法
+
+### まとめ
+
+単体テストの実装をモデル・外部APIを例に実装してみました。またリファクタリングのテクニックについてもご紹介しました。
+こちらがRSpecの基礎となっていくので是非抑えていただいて以降のテストに活かしていただければと思います。
+
+
+
 
