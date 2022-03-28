@@ -694,8 +694,212 @@ end
 
 のようにすることができます。（詳細は割愛しますが、`sign_in`メソッドはdeviseのメソッドです。テストでも設定ファイルに記述が必要ですが使用することができます。）
 
+#### shoulda-matchers
+これはexampleを簡素に記述することができるようになる外部ライブラリです。
+まずは導入しましょう。
 
-#### テストデータの作成方法
+Gemfile
+```ruby
+group :test do
+
+  ## 省略
+  
+  gem 'shoulda-matchers'
+end
+```
+
+ターミナル
+```ruby
+bundle install
+```
+
+rails_helperに設定を記述します。
+
+spec/rails_helper.rb
+```ruby
+## 省略
+
+Shoulda::Matchers.configure do |config|
+  config.integrate do |with|
+    with.test_framework :rspec
+    with.library :rails
+  end
+end
+
+```
+
+これで準備が整いました。
+
+Userモデルのスペックを例にリファクタリングしてみましょう。
+
+以前、nicknameのvalidationテストは下記のように書いていました。
+
+```ruby
+describe 'nickname' do
+  it 'nilの場合、無効であること' do
+    user = User.new(
+      nickname: nil,
+      email: 'tester@example.com',
+      password: 'p@ssword!!',
+      password_confirmation: 'p@ssword!!',
+    )
+    user.valid?
+    expect(user.errors[:nickname]).to include("を入力してください")
+  end
+
+  it '空文字の場合、無効であること' do
+    user = User.new(
+      nickname: "",
+      email: 'tester@example.com',
+      password: 'p@ssword!!',
+      password_confirmation: 'p@ssword!!',
+    )
+    user.valid?
+    expect(user.errors[:nickname]).to include("を入力してください")
+  end
+
+  it 'すでに使用されているnicknameの場合、保存できないこと' do
+    User.create(
+      nickname: 'Takashi',
+      email: 'tester_1@example.com',
+      password: 'p@ssword!!',
+      password_confirmation: 'p@ssword!!',
+    )
+
+    user = User.new(
+      nickname: 'Takashi',
+      email: 'tester_2@example.com',
+      password: 'p@ssword!!',
+      password_confirmation: 'p@ssword!!',
+    )
+    user.valid?
+    expect(user.errors[:nickname]).to include("はすでに存在します")
+  end
+
+  it '10文字以内の場合、有効であること' do
+    user = User.new(
+      nickname: 'TakashiKai',
+      email: 'tester@example.com',
+      password: 'p@ssword!!',
+      password_confirmation: 'p@ssword!!',
+    )
+    expect(user).to be_valid
+  end
+
+  it '11文字以上の場合、無効であること' do
+    user = User.new(
+      nickname: 'TakashiKaii',
+      email: 'tester@example.com',
+      password: 'p@ssword!!',
+      password_confirmation: 'p@ssword!!',
+    )
+    user.valid?
+    expect(user.errors[:nickname]).to include("は10文字以内で入力してください")
+  end
+ end
+end
+
+```
+
+こちらを`shoulda-matchers`を使用して記述すると下記のようになります。
+
+```ruby
+  describe 'nickname' do
+    it { is_expected.to validate_presence_of :nickname }
+    it { is_expected.to validate_uniqueness_of :nickname }
+    it { is_expected.to validate_length_of(:nickname).is_at_most(10) }
+  end
+```
+
+なんとexampleがたったの３行になってしまいました！！
+
+`is_expected`でUserのインスタンスを作成しています。
+`validate_presence_of`は、引数である`:nickname`がnilまたはブランクだったときに無効であるかをチェックしています。
+`validate_uniqueness_of`は、同じくnicknameが同一のデータが作成できないことをチェックしていて、
+`validate_length_of(:nickname).is_at_most(10)`は10文字以内は可、11文字以上は作成できないことをチェックしています。
+
+本当にテストできているか確かめるには、`to`を`to_not`に置き換えて実行してみましょう。
+例えば`it { is_expected.to validate_length_of(:nickname).is_at_most(10) }`を`it { is_expected.to_not validate_length_of(:nickname).is_at_most(10) }`にして実行すると下記のようなエラーになります。
+
+```ruby
+   Expected User not to validate that the length of :nickname is at most
+       10, but this could not be proved.
+         After setting :nickname to ‹"xxxxxxxxxx"›, the matcher expected the
+         User to be invalid, but it was valid instead.
+```
+
+`‹"xxxxxxxxxx"›`を見るとマッチャが自動的に10文字の文字列を作成してインスタンスを作成していることがわかります。
+この10文字を当てはめて実行したとき、`User to be invalid, but it was valid instead.`とあるように
+Userインスタンスは作成できないことを期待していますが、正常に作成できてしまっています。
+
+つまり、`it { is_expected.to validate_length_of(:nickname).is_at_most(10) }`は正常に働いており、正しくテストできていると言えます。
+`.is_at_most(10)`の数字を9や11などにしたときにどのように動作するか確かめてもいいかもしれません。
+
+他にもたくさんのマッチャがあるので是非下記を参考にしてみてください。
+https://github.com/thoughtbot/shoulda-matchers
+
+では一度ここまでの知識で`user_spec.rb`をリファクタリングしてみましょう。
+
+```ruby
+require 'rails_helper'
+
+RSpec.describe User, type: :model do
+  it "nickname, email, password, password_confirmationがあれば有効であること" do
+    user = User.new(
+      nickname: 'Takashi',
+      email: 'tester@example.com',
+      password: 'p@ssword!!',
+      password_confirmation: 'p@ssword!!',
+    )
+    expect(user).to be_valid
+  end
+
+  describe 'アソシエーション' do
+    it { is_expected.to have_many :posts }
+    it { is_expected.to have_many :comments }
+  end
+
+  describe 'nickname' do
+    it { is_expected.to validate_presence_of :nickname }
+    it { is_expected.to validate_uniqueness_of :nickname }
+    it { is_expected.to validate_length_of(:nickname).is_at_most(10) }
+  end
+
+  describe 'email' do
+    it { is_expected.to validate_presence_of :email }
+    it { is_expected.to validate_uniqueness_of(:email).case_insensitive }
+    it 'emailの形式ではない場合、無効な状態であること' do
+      user = build(:user, email: 'example_no_email')
+      user.valid?
+      expect(user.errors[:email]).to include("は不正な値です") #invalid
+    end
+
+    it 'emailは全角文字を使用する場合、無効な状態であること' do
+      user = build(:user, email: 'ｅｘａｐｌｅ@gmail.com')
+      user.valid?
+      expect(user.errors[:email]).to include("は不正な値です") #invalid
+    end
+  end
+
+  describe 'password' do
+    it { is_expected.to validate_presence_of :password }
+    it { is_expected.to validate_length_of(:password).is_at_least(6).is_at_most(128) }
+    it { is_expected.to validate_presence_of :password_confirmation }
+
+    it 'passwordとpassword_confirmationが不一致の場合、無効な状態であること' do
+      user = build(:user, password: 'password', password_confirmation: 'password_confirmation')
+      user.valid?
+      expect(user.errors[:password_confirmation]).to include("とパスワードの入力が一致しません") #confirmation
+    end
+  end
+end
+
+```
+
+非常に簡素にまとまりましたね！！
+
+
+### テストデータの作成方法
 テストを作成するにあたり、テストデータの作成は非常に重要です。
 テストが膨大になればなるほどテストデータの作成コストはどんどん膨らんでいきます。
 そこで、RailsではFactorybotというライブラリを使用して簡単にテストデータを作成する方法が用意されています。
@@ -724,7 +928,7 @@ bundle install
 rails g factory_bot:model user
 ```
 
-するとspec/factories/user.rbというファイルが作成されます。
+するとspec/factories/users.rbというファイルが作成されます。
 例えば下記のように記述します。
 
 ```ruby
@@ -762,7 +966,7 @@ end
 上記のように`create`メソッドを使用するとfactoryのデータを参照して作成することができます。
 `create`は引数にシンボルをとり、この値は、`spec/factories`配下のファイル内の`factory :user do`を見つけて作成しています。
 
-つまり、今回のケースでは`spec/factories/user.rb`で`factory :user do`と定義されているため、
+つまり、今回のケースでは`spec/factories/users.rb`で`factory :user do`と定義されているため、
 `post_spec.rb`にて`create(:user)`とすると`let(:user)`の変数に
 
 ```ruby
@@ -775,6 +979,14 @@ User.new(
 ```
 が代入されることになります。
 
+また、`create(:user)`とするとspec/factories/users.rbの定義をもとにuserインスタンスを作成しますが、データを上書きすることもできます。
+例えばnicknameを違う値にしたい時は
+
+```ruby
+let(:user) { create(:user, nickname: "Kato") }
+```
+とすることで、"Takashi"ではなく"Kato"で作成されます。
+
 ※詳細は割愛しますが今回のアプリではFactorybotでデータ作成する際に、併せてFakerというライブラリを使用しています。
 上記では毎回同じテストデータになってしまいますが、Fakerを使用するとランダムな値を簡単に作成することができたり、
 email形式やurl形式のデータを簡単に作成してくれるため、非常に便利です。
@@ -782,7 +994,9 @@ email形式やurl形式のデータを簡単に作成してくれるため、非
 
 https://github.com/faker-ruby/faker
 
-テストデータの作成方法(Factorybot、Fackerの導入)
+
+
+
 外部APIテスト
 vcrの使用方法
 
