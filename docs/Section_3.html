@@ -787,16 +787,68 @@ RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-sy
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>上記のように置き換えることができました。
-しかし、<code>before</code>との違いやメリットがこのままだとわかりづらいですね。
-わかりやすいように今度はPostモデルのテストで解説します。</p>
-<p>Postモデルを一旦このように実装しました。
-有効な属性の場合のテストのみ実装しています。</p>
-<pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
+では、<code>before</code>と<code>let</code>の違いはなんでしょうか？</p>
+<p><code>before</code>は各exampleの前で必ず実行されます。
+対して<code>let</code>は宣言している箇所ではまだ処理が実行されず、変数が呼び出されて初めて、処理が実行されます。</p>
+<pre><code class="lang-ruby">  let(<span class="hljs-symbol">:user</span>) {
+    User.new(
+      <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+      <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+      <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    )
+  }
+</code></pre>
+<p>上記のように<code>let</code>を宣言していますが、このときにはまだ<code>user</code>という変数には何も値が入っていません。</p>
+<pre><code class="lang-ruby">  it <span class="hljs-string">&quot;nickname, email, password, password_confirmationがあれば有効であること&quot;</span> <span class="hljs-keyword">do</span>
+    expect(user).to be_valid
+  <span class="hljs-keyword">end</span>
+</code></pre>
+<p>上記の<code>expect(user).to be_valid</code>にて、<code>user</code>が呼び出されたタイミングで初めて<code>let</code>で宣言した<code>user</code>変数に値が格納されます。</p>
+<p>つまり、<code>before</code>では（スコープはありますが）すべてのexampleの実行前に呼び出されますが、<code>let</code>は変数を呼び出して初めて実行されるため、
+<code>let</code>を使用すると不必要なデータを作成せずに済みます。</p>
+<p><code>before</code>で処理する内容はすべてのexampleで必要な処理を定義すべきです。例えば、「ユーザーがログインしている場合」の処理を実行したいのであれば、
+そのグループのexampleでは必ずログイン状態を作成する必要があるため、</p>
+<pre><code class="lang-ruby">before <span class="hljs-keyword">do</span>
+  sign_in user
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>のようにすることができます。（詳細は割愛しますが、<code>sign_in</code>メソッドはdeviseのメソッドです。テストでも設定ファイルに記述が必要ですが使用することができます。）</p>
+<h4 id="テストデータの作成方法">3.5.3. テストデータの作成方法</h4>
+<p>テストを作成するにあたり、テストデータの作成は非常に重要です。
+テストが膨大になればなるほどテストデータの作成コストはどんどん膨らんでいきます。
+そこで、RailsではFactorybotというライブラリを使用して簡単にテストデータを作成する方法が用意されています。</p>
+<p>まずはFactorybotを導入します。</p>
+<p>Gemfile</p>
+<pre><code class="lang-ruby">group <span class="hljs-symbol">:development</span>, <span class="hljs-symbol">:test</span> <span class="hljs-keyword">do</span>
 
-describe Post <span class="hljs-keyword">do</span>
-  let(<span class="hljs-symbol">:user</span>) { create(<span class="hljs-symbol">:user</span>, <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>) }
+  <span class="hljs-comment">## 省略</span>
 
-　　　　　<span class="hljs-comment"># 有効な属性の場合のテスト</span>
+  gem <span class="hljs-string">&apos;factory_bot_rails&apos;</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>ターミナル</p>
+<pre><code class="lang-ruby">bundle install
+</code></pre>
+<p>続いてジェネレータを使用してファイルを作成していきます。Userモデルのテストデータを作成したい場合は下記を実行します。</p>
+<p>ターミナル</p>
+<pre><code class="lang-ruby">rails g <span class="hljs-symbol">factory_bot:</span>model user
+</code></pre>
+<p>するとspec/factories/user.rbというファイルが作成されます。
+例えば下記のように記述します。</p>
+<pre><code class="lang-ruby">FactoryBot.define <span class="hljs-keyword">do</span>
+  factory <span class="hljs-symbol">:user</span> <span class="hljs-keyword">do</span>
+    nickname { <span class="hljs-string">&quot;Takashi&quot;</span> }
+    email { <span class="hljs-string">&quot;example@gmail.com&quot;</span> }
+    password { <span class="hljs-string">&quot;password&quot;</span> }
+    password_confirmation { password }
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>では実際にPostモデルスペックを例にこのテストデータを使用してみます。</p>
+<pre><code class="lang-ruby">describe Post <span class="hljs-keyword">do</span>
+  let(<span class="hljs-symbol">:user</span>) { create(<span class="hljs-symbol">:user</span>) }
+
   it <span class="hljs-string">&apos;text, userがあれば有効であること&apos;</span> <span class="hljs-keyword">do</span>
     post = Post.new(
       <span class="hljs-symbol">text:</span> <span class="hljs-string">&apos;投稿のテキスト&apos;</span>,
@@ -804,13 +856,33 @@ describe Post <span class="hljs-keyword">do</span>
     )
     expect(user).to be_valid
   <span class="hljs-keyword">end</span>
+
+
+  <span class="hljs-comment">## 省略</span>
+
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>let let! subject</p>
+<p>上記のように<code>create</code>メソッドを使用するとfactoryのデータを参照して作成することができます。
+<code>create</code>は引数にシンボルをとり、この値は、<code>spec/factories</code>配下のファイル内の<code>factory :user do</code>を見つけて作成しています。</p>
+<p>つまり、今回のケースでは<code>spec/factories/user.rb</code>で<code>factory :user do</code>と定義されているため、
+<code>post_spec.rb</code>にて<code>create(:user)</code>とすると<code>let(:user)</code>の変数に</p>
+<pre><code class="lang-ruby">User.new(
+  <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&quot;Takashi&quot;</span>,
+  <span class="hljs-symbol">email:</span> <span class="hljs-string">&quot;example@gmail.com&quot;</span>
+  <span class="hljs-symbol">password:</span> <span class="hljs-string">&quot;password&quot;</span> 
+  <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&quot;password&quot;</span> 
+)
+</code></pre>
+<p>が代入されることになります。</p>
+<p>※詳細は割愛しますが今回のアプリではFactorybotでデータ作成する際に、併せてFakerというライブラリを使用しています。
+上記では毎回同じテストデータになってしまいますが、Fakerを使用するとランダムな値を簡単に作成することができたり、
+email形式やurl形式のデータを簡単に作成してくれるため、非常に便利です。
+詳細は下記GitHubをご覧ください。</p>
+<p><a href="https://github.com/faker-ruby/faker" target="_blank">https://github.com/faker-ruby/faker</a></p>
 <p>テストデータの作成方法(Factorybot、Fackerの導入)
 外部APIテスト
 vcrの使用方法</p>
-<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#単体テスト">単体テスト</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#1__RSpecの導入方法">2. 1. RSpecの導入方法</a></li><li><a href="#2__Modelの単体テストの実装">3. 2. Modelの単体テストの実装</a></li><ul><li><a href="#モデルスペックの観点">3.1. モデルスペックの観点</a></li><li><a href="#ファイルの作成">3.2. ファイルの作成</a></li><li><a href="#Userモデルの要件">3.3. Userモデルの要件</a></li><ul><li><a href="#describe">3.3.1. describe</a></li><li><a href="#it">3.3.2. it</a></li></ul><li><a href="#テストを実装する">3.4. テストを実装する</a></li><ul><li><a href="#有効な属性の場合のテスト">3.4.1. 有効な属性の場合のテスト</a></li><li><a href="#expectメソッドとマッチャ">3.4.2. expectメソッドとマッチャ</a></li><li><a href="#validationのテスト">3.4.3. validationのテスト</a></li></ul><li><a href="#DRYに書く">3.5. DRYに書く</a></li><ul><li><a href="#before">3.5.1. before</a></li><li><a href="#let">3.5.2. let</a></li></ul></ul></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
+<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#単体テスト">単体テスト</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#1__RSpecの導入方法">2. 1. RSpecの導入方法</a></li><li><a href="#2__Modelの単体テストの実装">3. 2. Modelの単体テストの実装</a></li><ul><li><a href="#モデルスペックの観点">3.1. モデルスペックの観点</a></li><li><a href="#ファイルの作成">3.2. ファイルの作成</a></li><li><a href="#Userモデルの要件">3.3. Userモデルの要件</a></li><ul><li><a href="#describe">3.3.1. describe</a></li><li><a href="#it">3.3.2. it</a></li></ul><li><a href="#テストを実装する">3.4. テストを実装する</a></li><ul><li><a href="#有効な属性の場合のテスト">3.4.1. 有効な属性の場合のテスト</a></li><li><a href="#expectメソッドとマッチャ">3.4.2. expectメソッドとマッチャ</a></li><li><a href="#validationのテスト">3.4.3. validationのテスト</a></li></ul><li><a href="#DRYに書く">3.5. DRYに書く</a></li><ul><li><a href="#before">3.5.1. before</a></li><li><a href="#let">3.5.2. let</a></li><li><a href="#テストデータの作成方法">3.5.3. テストデータの作成方法</a></li></ul></ul></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
                                 
                                 </section>
                             
@@ -853,7 +925,7 @@ vcrの使用方法</p>
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"next":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"previous":{"title":"2.RSpecの概要解説","level":"1.3","depth":1,"path":"Section_2.md","ref":"Section_2.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_3.md","mtime":"2022-03-16T09:18:13.892Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-28T06:49:21.648Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"next":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"previous":{"title":"2.RSpecの概要解説","level":"1.3","depth":1,"path":"Section_2.md","ref":"Section_2.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_3.md","mtime":"2022-03-28T08:02:57.889Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-28T08:03:13.030Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
