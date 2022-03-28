@@ -656,19 +656,95 @@ end
 ```
 
 上記のように置き換えることができました。
-しかし、`before`との違いやメリットがこのままだとわかりづらいですね。
-わかりやすいように今度はPostモデルのテストで解説します。
+では、`before`と`let`の違いはなんでしょうか？
 
-Postモデルを一旦このように実装しました。
-有効な属性の場合のテストのみ実装しています。
+`before`は各exampleの前で必ず実行されます。
+対して`let`は宣言している箇所ではまだ処理が実行されず、変数が呼び出されて初めて、処理が実行されます。
 
 ```ruby
-require 'rails_helper'
+  let(:user) {
+    User.new(
+      nickname: 'Takashi',
+      email: 'tester@example.com',
+      password: 'p@ssword!!',
+      password_confirmation: 'p@ssword!!',
+    )
+  }
+```
+上記のように`let`を宣言していますが、このときにはまだ`user`という変数には何も値が入っていません。
 
+```ruby
+  it "nickname, email, password, password_confirmationがあれば有効であること" do
+    expect(user).to be_valid
+  end
+```
+上記の`expect(user).to be_valid`にて、`user`が呼び出されたタイミングで初めて`let`で宣言した`user`変数に値が格納されます。
+
+つまり、`before`では（スコープはありますが）すべてのexampleの実行前に呼び出されますが、`let`は変数を呼び出して初めて実行されるため、
+`let`を使用すると不必要なデータを作成せずに済みます。
+
+`before`で処理する内容はすべてのexampleで必要な処理を定義すべきです。例えば、「ユーザーがログインしている場合」の処理を実行したいのであれば、
+そのグループのexampleでは必ずログイン状態を作成する必要があるため、
+
+```ruby
+before do
+  sign_in user
+end
+```
+
+のようにすることができます。（詳細は割愛しますが、`sign_in`メソッドはdeviseのメソッドです。テストでも設定ファイルに記述が必要ですが使用することができます。）
+
+
+#### テストデータの作成方法
+テストを作成するにあたり、テストデータの作成は非常に重要です。
+テストが膨大になればなるほどテストデータの作成コストはどんどん膨らんでいきます。
+そこで、RailsではFactorybotというライブラリを使用して簡単にテストデータを作成する方法が用意されています。
+
+まずはFactorybotを導入します。
+
+Gemfile
+```ruby
+group :development, :test do
+
+  ## 省略
+
+  gem 'factory_bot_rails'
+end
+```
+
+ターミナル
+```ruby
+bundle install
+```
+
+続いてジェネレータを使用してファイルを作成していきます。Userモデルのテストデータを作成したい場合は下記を実行します。
+
+ターミナル
+```ruby
+rails g factory_bot:model user
+```
+
+するとspec/factories/user.rbというファイルが作成されます。
+例えば下記のように記述します。
+
+```ruby
+FactoryBot.define do
+  factory :user do
+    nickname { "Takashi" }
+    email { "example@gmail.com" }
+    password { "password" }
+    password_confirmation { password }
+  end
+end
+
+```
+
+では実際にPostモデルスペックを例にこのテストデータを使用してみます。
+
+```ruby
 describe Post do
-  let(:user) { create(:user, nickname: 'Takashi') }
+  let(:user) { create(:user) }
 
-　　　　　# 有効な属性の場合のテスト
   it 'text, userがあれば有効であること' do
     post = Post.new(
       text: '投稿のテキスト',
@@ -676,17 +752,35 @@ describe Post do
     )
     expect(user).to be_valid
   end
+  
+  
+  ## 省略
+  
 end
-
 ```
 
+上記のように`create`メソッドを使用するとfactoryのデータを参照して作成することができます。
+`create`は引数にシンボルをとり、この値は、`spec/factories`配下のファイル内の`factory :user do`を見つけて作成しています。
 
+つまり、今回のケースでは`spec/factories/user.rb`で`factory :user do`と定義されているため、
+`post_spec.rb`にて`create(:user)`とすると`let(:user)`の変数に
 
+```ruby
+User.new(
+  nickname: "Takashi",
+  email: "example@gmail.com"
+  password: "password" 
+  password_confirmation: "password" 
+)
+```
+が代入されることになります。
 
-let let! subject
+※詳細は割愛しますが今回のアプリではFactorybotでデータ作成する際に、併せてFakerというライブラリを使用しています。
+上記では毎回同じテストデータになってしまいますが、Fakerを使用するとランダムな値を簡単に作成することができたり、
+email形式やurl形式のデータを簡単に作成してくれるため、非常に便利です。
+詳細は下記GitHubをご覧ください。
 
-
-
+https://github.com/faker-ruby/faker
 
 テストデータの作成方法(Factorybot、Fackerの導入)
 外部APIテスト
