@@ -79,7 +79,13 @@ AWS Codebuildのビルドプロジェクトの作成画面です。
   
 ![スクリーンショット 2022-03-28 15 44 49](https://user-images.githubusercontent.com/52161269/160341256-61fa7819-164b-43b3-a197-855e81a8c67d.png)
 - ソースプロバイダ・・・GitHubやBitbucketなど　ソース共有ツールを指定する（今回はGitHub)
- - リポジトリ・・・ソースのリポジトリの種別（PublicリポジトリかPrivateリポジトリか）を選択（今回のmirameetVol28はパブリックリポジトリ）
+ - リポジトリ・・・ソースのリポジトリの種別（PublicリポジトリかPrivateリポジトリか）を選択  
+（今回のmirameetVol27はパブリックリポジトリ）
+
+```
+https://github.com/miracleave-ltd/mirameetVol27
+```
+
  - GitHubリポジトリ・・・対象のリポジトリを選択
  
  ![スクリーンショット 2022-03-06 22 03 50](https://user-images.githubusercontent.com/52161269/156924513-55b56734-d3fb-4582-81fc-ef74c83fb045.png)  
