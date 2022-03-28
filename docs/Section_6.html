@@ -316,18 +316,23 @@
 </ul>
 <p><img src="https://user-images.githubusercontent.com/52161269/160341256-61fa7819-164b-43b3-a197-855e81a8c67d.png" alt="スクリーンショット 2022-03-28 15 44 49"></p>
 <ul>
-<li><p>ソースプロバイダ・・・GitHubやBitbucketなど　ソース共有ツールを指定する（今回はGitHub)</p>
-<ul>
-<li>リポジトリ・・・ソースのリポジトリの種別（PublicリポジトリかPrivateリポジトリか）を選択（今回のmirameetVol28はパブリックリポジトリ）</li>
-<li>GitHubリポジトリ・・・対象のリポジトリを選択</li>
+<li>ソースプロバイダ・・・GitHubやBitbucketなど　ソース共有ツールを指定する（今回はGitHub)<ul>
+<li>リポジトリ・・・ソースのリポジトリの種別（PublicリポジトリかPrivateリポジトリか）を選択<br>（今回のmirameetVol27はパブリックリポジトリ）</li>
 </ul>
-<p><img src="https://user-images.githubusercontent.com/52161269/156924513-55b56734-d3fb-4582-81fc-ef74c83fb045.png" alt="スクリーンショット 2022-03-06 22 03 50">  </p>
 </li>
+</ul>
+<pre><code>https://github.com/miracleave-ltd/mirameetVol27
+</code></pre><ul>
+<li><p>GitHubリポジトリ・・・対象のリポジトリを選択</p>
+<p><img src="https://user-images.githubusercontent.com/52161269/156924513-55b56734-d3fb-4582-81fc-ef74c83fb045.png" alt="スクリーンショット 2022-03-06 22 03 50">  </p>
+<ul>
 <li>環境イメージ・・・AWSの用意している環境かDockerを指定する</li>
 <li>オペレーティングシステム・・・OSを指定する（今回は、Ubuntu)</li>
 <li>ランタイム・・・ランタイムを選択（Standardを選択）</li>
 <li>イメージ・・・イメージを選択(aws/codebuild/standard:4.0)</li>
 <li>特権付与・・・docker-composeでビルドする際はチェックを入れる</li>
+</ul>
+</li>
 </ul>
 <p><img src="https://user-images.githubusercontent.com/52161269/156926221-27c45b16-ee1d-4682-8bb9-90ca5b5aa617.png" alt="スクリーンショット 2022-03-06 22 49 09">
 <img src="https://user-images.githubusercontent.com/52161269/160338195-a1f79fab-597a-47d3-bab3-61a9b99094ce.png" alt="スクリーンショット 2022-03-28 15 22 18"></p>
@@ -392,7 +397,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"next":{"title":"7.まとめ","level":"1.8","depth":1,"path":"Section_7.md","ref":"Section_7.md","articles":[]},"previous":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_6.md","mtime":"2022-03-28T08:02:57.891Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-28T08:03:13.030Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"next":{"title":"7.まとめ","level":"1.8","depth":1,"path":"Section_7.md","ref":"Section_7.md","articles":[]},"previous":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_6.md","mtime":"2022-03-28T09:24:48.074Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-28T09:24:57.217Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
