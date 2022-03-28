@@ -91,7 +91,7 @@ AWS Codebuildのビルドプロジェクトの作成画面です。
 
 
 ![スクリーンショット 2022-03-06 22 49 09](https://user-images.githubusercontent.com/52161269/156926221-27c45b16-ee1d-4682-8bb9-90ca5b5aa617.png)
-![スクリーンショット 2022-03-06 22 47 25](https://user-images.githubusercontent.com/52161269/156926225-3d36c51c-3612-4be2-8d7f-4d506f4c143a.png)  
+![スクリーンショット 2022-03-28 15 22 18](https://user-images.githubusercontent.com/52161269/160338195-a1f79fab-597a-47d3-bab3-61a9b99094ce.png)
 - VPC・・・事前に作成したVPCを選択
 - サブネット・・・プライベートサブネットを選択
 - セキュリティグループ・・・CodeBuild用のセキュリティグループを選択
