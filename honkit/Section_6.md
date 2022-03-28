@@ -65,7 +65,7 @@ CodebuildはVPC内に設置することも可能なので、同じVPC内にRDS�
 **ポイント**
 - VPCのパブリックサブネットにはNatGatewayを設置し、インターネット接続を可能にしておく
 - CodeBuildとRDSはプライベートサブネットに設置する
-- RDSのセキュリティグループに、CodeBuildに設定しいるセキュリティグループからのアクセスを追加する。（この設定によってCodeBuildはRDSに接続可能になる）
+- RDSのセキュリティグループに、CodeBuildに設定しているセキュリティグループからのアクセスを追加する。（この設定によってCodeBuildはRDSに接続可能になる）
 
 ***
 
@@ -87,7 +87,7 @@ AWS Codebuildのビルドプロジェクトの作成画面です。
 - オペレーティングシステム・・・OSを指定する（今回は、Ubuntu)
 - ランタイム・・・ランタイムを選択（Standardを選択）
 - イメージ・・・イメージを選択(aws/codebuild/standard:4.0)
-- 特権付与・・・docker-composeでビルドする際はtチェックを入れる
+- 特権付与・・・docker-composeでビルドする際はチェックを入れる
 
 
 ![スクリーンショット 2022-03-06 22 49 09](https://user-images.githubusercontent.com/52161269/156926221-27c45b16-ee1d-4682-8bb9-90ca5b5aa617.png)
