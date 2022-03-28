@@ -296,16 +296,19 @@
         - docker-compose -f docker_compose_test.yml run app bundle exec rake spec   ・・・テストを実行する。
 </code></pre><p>※１<a href="https://github.com/aws/aws-codebuild-docker-images/blob/master/ubuntu/standard/4.0/runtimes.yml" target="_blank">バージョンはこちらを参照</a></p>
 <h2 id="ビルドプロジェクトを設定する">3. ビルドプロジェクトを設定する</h2>
-<p>実際の現場では、テスト環境用のDBが用意されていることがあると思います。Codebuildは、VPC内に設置することも可能です。<br>同じVPC内にRDSを設置することでCodeBuildからRDSに接続してテストを実行することができます。<br><strong>今回は実際の現場で使えそうな利用方法として、テスト用のRDSに接続してビルドを実行したいと思います。</strong></p>
+<p>実際の現場では、テスト環境用のDBが用意されていることがあると思います。<br>CodebuildはVPC内に設置することも可能なので、同じVPC内にRDSを設置することでCodeBuildからRDSに接続してテストを実行することができます。  </p>
+<p><strong>今回は実際の現場で使えそうな利用方法として、テスト用のRDSに接続してビルドを実行したいと思います。</strong></p>
+<hr>
 <h3 id="今回使用するAWSのアーキテクトの確認">3.1. 今回使用するAWSのアーキテクトの確認</h3>
 <p> <img src="https://user-images.githubusercontent.com/52161269/156916843-075d9920-4f8b-4d75-b94e-e7cf2be1489d.png" alt="スクリーンショット 2022-03-06 18 17 09"></p>
-<h3 id="ポイント">3.2. ポイント</h3>
+<p><strong>ポイント</strong></p>
 <ul>
 <li>VPCのパブリックサブネットにはNatGatewayを設置し、インターネット接続を可能にしておく</li>
 <li>CodeBuildとRDSはプライベートサブネットに設置する</li>
 <li>RDSのセキュリティグループに、CodeBuildに設定しいるセキュリティグループからのアクセスを追加する。（この設定によってCodeBuildはRDSに接続可能になる）</li>
 </ul>
-<h3 id="ビルドプロジェクトの作成">3.3. ビルドプロジェクトの作成</h3>
+<hr>
+<h3 id="ビルドプロジェクトの作成">3.2. ビルドプロジェクトの作成</h3>
 <p>ビルドプロジェクトでVPCを指定する必要があるので、事前にVPC・サブネット・RDSを作成しておきましょう。<br>AWS Codebuildのビルドプロジェクトの作成画面です。</p>
 <p><img src="https://user-images.githubusercontent.com/52161269/156923853-9b0e6438-74fc-46dc-9cef-fe34e57a9a06.png" alt="スクリーンショット 2022-03-06 21 45 21">  </p>
 <ul>
@@ -327,7 +330,7 @@
 <li>特権付与・・・docker-composeでビルドする際はtチェックを入れる</li>
 </ul>
 <p><img src="https://user-images.githubusercontent.com/52161269/156926221-27c45b16-ee1d-4682-8bb9-90ca5b5aa617.png" alt="スクリーンショット 2022-03-06 22 49 09">
-<img src="https://user-images.githubusercontent.com/52161269/156926225-3d36c51c-3612-4be2-8d7f-4d506f4c143a.png" alt="スクリーンショット 2022-03-06 22 47 25">  </p>
+<img src="https://user-images.githubusercontent.com/52161269/160338195-a1f79fab-597a-47d3-bab3-61a9b99094ce.png" alt="スクリーンショット 2022-03-28 15 22 18"></p>
 <ul>
 <li>VPC・・・事前に作成したVPCを選択</li>
 <li>サブネット・・・プライベートサブネットを選択</li>
@@ -342,11 +345,11 @@
 <p>最後に、ビルドプロジェクトを作成するをクリックして作成します！</p>
 <h2 id="CodeBuildでビルドを実行する">4. CodeBuildでビルドを実行する</h2>
 <ol>
-<li>ビルドプロジェクト一覧から、プロジェクをクリック</li>
+<li>ビルドプロジェクト一覧から、プロジェクトをクリック</li>
 <li>「ビルドを開始」ボタンをクリック</li>
 </ol>
 <p>ビルドには、５分ほどかかります。</p>
-<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#AWS_CodeBuildでテスト＆ビルドする">AWS CodeBuildでテスト＆ビルドする</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#AWS_CodeBuildの解説">2. AWS CodeBuildの解説</a></li><ul><li><a href="#AWS_CodeBuildの仕組み">2.1. AWS CodeBuildの仕組み</a></li><li><a href="#AWS_CodeBuildの処理の流れ">2.2. AWS CodeBuildの処理の流れ</a></li><li><a href="#buildspec_yml">2.3. buildspec.yml</a></li></ul><li><a href="#ビルドプロジェクトを設定する">3. ビルドプロジェクトを設定する</a></li><ul><li><a href="#今回使用するAWSのアーキテクトの確認">3.1. 今回使用するAWSのアーキテクトの確認</a></li><li><a href="#ポイント">3.2. ポイント</a></li><li><a href="#ビルドプロジェクトの作成">3.3. ビルドプロジェクトの作成</a></li></ul><li><a href="#CodeBuildでビルドを実行する">4. CodeBuildでビルドを実行する</a></li></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
+<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#AWS_CodeBuildでテスト＆ビルドする">AWS CodeBuildでテスト＆ビルドする</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#AWS_CodeBuildの解説">2. AWS CodeBuildの解説</a></li><ul><li><a href="#AWS_CodeBuildの仕組み">2.1. AWS CodeBuildの仕組み</a></li><li><a href="#AWS_CodeBuildの処理の流れ">2.2. AWS CodeBuildの処理の流れ</a></li><li><a href="#buildspec_yml">2.3. buildspec.yml</a></li></ul><li><a href="#ビルドプロジェクトを設定する">3. ビルドプロジェクトを設定する</a></li><ul><li><a href="#今回使用するAWSのアーキテクトの確認">3.1. 今回使用するAWSのアーキテクトの確認</a></li><li><a href="#ビルドプロジェクトの作成">3.2. ビルドプロジェクトの作成</a></li></ul><li><a href="#CodeBuildでビルドを実行する">4. CodeBuildでビルドを実行する</a></li></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
                                 
                                 </section>
                             
@@ -389,7 +392,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"next":{"title":"7.まとめ","level":"1.8","depth":1,"path":"Section_7.md","ref":"Section_7.md","articles":[]},"previous":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_6.md","mtime":"2022-03-26T12:15:15.525Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-27T14:16:09.281Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"next":{"title":"7.まとめ","level":"1.8","depth":1,"path":"Section_7.md","ref":"Section_7.md","articles":[]},"previous":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_6.md","mtime":"2022-03-28T06:34:58.034Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-28T06:35:13.244Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
