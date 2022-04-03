@@ -95,7 +95,7 @@ RSpec.describe 'Posts', type: :request do
 ④リクエストが通ることを確認するので、HTTPレスポンスのステータスが200であることが期待値  
 `it_behaves_like`は、新しいコンテキスト(context 'xxx'do ... endのこと)を自動生成して、そこにテストケースを埋め込みます。  
 `return_response_status`は、同じテストコードの重複を避けるために`shared_examples`を使ってまとめています。  
-中身のテストコードは、別ファイルで定義しています。
+中身のテストコードは、別ファイルで定義しています。  
 `mirameetVol27/spec/support/examples/return_response_status.rb`  
 ```
 RSpec.shared_examples 'return_response_status' do |status_no|
