@@ -280,7 +280,7 @@
 </li>
 </ol>
 <h3 id="buildspec_yml">2.3. buildspec.yml</h3>
-<p>  ビルド環境で実行するコマンドなどを記載するyaml形式のファイル。  </p>
+<p>  ビルド環境で実行するコマンドなどを記載するyaml形式のファイル。<br>パス：<code>mirameetVol27/buildspec.yml</code></p>
 <pre><code>  version: 0.2   ・・・buildspecのバージョンを指定（最新の0.2を使用）
   phases:
     install:   ・・・インストールの段階で実行するコマンドを設定する。主にビルド環境で使用するパッケージのインストールなどに使用。
@@ -323,7 +323,8 @@
 <p>「スタックの名前」は<code>mirameet-27-vpc</code>パラメータの「PJPrefix」は<code>mirameet</code>とし、「次へ」をクリックします。
 <img src="https://user-images.githubusercontent.com/52161269/161422439-58e54002-3e9d-4439-b3b8-0ada6d8f3060.png" alt="スクリーンショット 2022-04-03 19 08 02"></p>
 <h4 id="スタックの作成">3.1.4. スタックの作成</h4>
-<p>ステップ４のレビューまで「次へ」をクリックします。ステップ４まできたら下部にある「スタックの作成」をクリックします。</p>
+<p>ステップ４のレビューまで「次へ」をクリックします。<br>ステップ４まできたら下部にある「スタックの作成」をクリックします。<br>作成が完了すると、ステータスは<code>CREATE_COMPLETE</code>になります。
+<img src="https://user-images.githubusercontent.com/52161269/161433375-41bf145a-8d11-4f1c-b4a5-17deced1567a.png" alt="スクリーンショット 2022-04-03 23 40 11"></p>
 <h4 id="RDSのスタック作成">3.1.5. RDSのスタック作成</h4>
 <p>スタックの作成が完了したら、上記と同じ流れでRDSのスタックを作成します。<br>テンプレートは<code>rds.yml</code><br>ファイルパス：  </p>
 <pre><code>/mirameetVol27/rds.yml
@@ -430,7 +431,7 @@ RDS_PORT : 3306
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"next":{"title":"7.まとめ","level":"1.8","depth":1,"path":"Section_7.md","ref":"Section_7.md","articles":[]},"previous":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_6.md","mtime":"2022-04-03T14:24:22.826Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-04-03T14:24:34.291Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"next":{"title":"7.まとめ","level":"1.8","depth":1,"path":"Section_7.md","ref":"Section_7.md","articles":[]},"previous":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_6.md","mtime":"2022-04-03T14:52:09.610Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-04-03T14:52:30.140Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
