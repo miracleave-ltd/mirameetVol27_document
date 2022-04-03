@@ -1057,9 +1057,204 @@ RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-sy
 email形式やurl形式のデータを簡単に作成してくれるため、非常に便利です。
 詳細は下記GitHubをご覧ください。</p>
 <p><a href="https://github.com/faker-ruby/faker" target="_blank">https://github.com/faker-ruby/faker</a></p>
-<p>外部APIテスト
-vcrの使用方法</p>
-<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#単体テスト">単体テスト</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#1__RSpecの導入方法">2. 1. RSpecの導入方法</a></li><li><a href="#2__Modelの単体テストの実装">3. 2. Modelの単体テストの実装</a></li><ul><li><a href="#モデルスペックの観点">3.1. モデルスペックの観点</a></li><li><a href="#ファイルの作成">3.2. ファイルの作成</a></li><li><a href="#Userモデルの要件">3.3. Userモデルの要件</a></li><ul><li><a href="#describe">3.3.1. describe</a></li><li><a href="#it">3.3.2. it</a></li></ul><li><a href="#テストを実装する">3.4. テストを実装する</a></li><ul><li><a href="#有効な属性の場合のテスト">3.4.1. 有効な属性の場合のテスト</a></li><li><a href="#expectメソッドとマッチャ">3.4.2. expectメソッドとマッチャ</a></li><li><a href="#validationのテスト">3.4.3. validationのテスト</a></li></ul><li><a href="#DRYに書く">3.5. DRYに書く</a></li><ul><li><a href="#before">3.5.1. before</a></li><li><a href="#let">3.5.2. let</a></li><li><a href="#shoulda-matchers">3.5.3. shoulda-matchers</a></li></ul><li><a href="#テストデータの作成方法">3.6. テストデータの作成方法</a></li></ul></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
+<h2 id="3__外部APIテスト">4. 3. 外部APIテスト</h2>
+<p>今回のアプリではスラックと連携しており、投稿したときに自動的にスラックのチャネルにチャットを投下する機能があります。</p>
+<ul>
+<li>メッセージを投下する(Post.create）</li>
+<li>Postモデルの<code>after_save :start_slack_sync</code>が呼ばれてjobが実行される</li>
+<li>jobがPostモデルの<code>slack_sync!</code>メソッドを呼び出す。</li>
+<li><code>Slack::SendPostService</code>の<code>send_post</code>メソッドが実行されてスラックにメッセージを投下する。</li>
+</ul>
+<p>という流れです。
+今回は外部APIテストとして<code>Slack::SendPostService</code>のテストを実装します。</p>
+<p>※詳細は割愛しますが、スラックに連携する際に<code>slack-notifier</code>というライブラリを使用しています。詳しく知りたい方は下記を参考にしてください。
+<a href="https://github.com/slack-notifier/slack-notifier" target="_blank">https://github.com/slack-notifier/slack-notifier</a></p>
+<h4 id="VCRの導入">4.0.1. VCRの導入</h4>
+<p>外部APIの連携テストの際はスタブを使用することが多いと思います。
+簡単にスタブを作成できるVCRというライブラリがあるのでご紹介します。</p>
+<p>ではまずは導入していきます。</p>
+<p>Gemfile</p>
+<pre><code class="lang-ruby">group <span class="hljs-symbol">:test</span> <span class="hljs-keyword">do</span>
+
+  <span class="hljs-comment">## 省略</span>
+
+  gem <span class="hljs-string">&apos;webmock&apos;</span>
+  gem <span class="hljs-string">&apos;vcr&apos;</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>VCRを使用する際は内部的にwebmockというライブラリも使用するため、一緒にインストールします。</p>
+<p>ターミナル</p>
+<pre><code class="lang-ruby">bundle install
+</code></pre>
+<p>spec_helper.rbを編集して設定を記述していきます。</p>
+<p>spec/spec_helper.rb</p>
+<pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;vcr&apos;</span>
+<span class="hljs-keyword">require</span> <span class="hljs-string">&apos;webmock&apos;</span>
+
+RSpec.configure <span class="hljs-keyword">do</span> <span class="hljs-params">|config|</span>
+ <span class="hljs-comment">## 省略</span>
+<span class="hljs-keyword">end</span>
+
+VCR.configure <span class="hljs-keyword">do</span> <span class="hljs-params">|c|</span>
+  c.cassette_library_dir = <span class="hljs-string">&apos;spec/vcr&apos;</span>
+  c.hook_into <span class="hljs-symbol">:webmock</span>
+  c.configure_rspec_metadata!
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>これで準備が整いました！</p>
+<p>ではテストを実装していきます。</p>
+<p>今回テストする処理は<code>app/servise/slack</code>配下の<code>send_post_service.rb</code>というファイルです。
+そのため、テストは<code>spec/servise/send_post_service_spec.rb</code>に作成します。</p>
+<pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
+
+describe Slack::SendPostService <span class="hljs-keyword">do</span>
+  describe <span class="hljs-string">&apos;slack alignment&apos;</span> <span class="hljs-keyword">do</span>
+    context <span class="hljs-string">&quot;#send_post&quot;</span> <span class="hljs-keyword">do</span>
+      it <span class="hljs-string">&apos;post to slack&apos;</span> <span class="hljs-keyword">do</span>
+
+      <span class="hljs-comment">## テストを書く</span>
+
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>まずは上記のように外枠を書いてみました。
+テストする箇所は<code>describe Slack::SendPostService do</code>として明示しています。
+テストする内容は<code>describe &apos;slack alignment&apos; do</code>としていて、スラックとの連携テストだよと記載しています。
+<code>context &quot;#send_post&quot; do</code>では<code>send_post</code>メソッドのテストを実装することを示しています。
+あるメソッドをテストする時は、慣習的に<code>#メソッド名</code>とすることが多いです。
+最後にexampleを<code>it &apos;post to slack&apos; do</code>としています。</p>
+<p>では実際にexampleの中身を書いていきましょう。
+その前に簡単にSendPostServiceの中身を見てみましょう。</p>
+<pre><code class="lang-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span>  <span class="hljs-title">Slack</span></span>
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SendPostService</span></span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(user_name)</span></span>
+      webhook_url = ENV[<span class="hljs-string">&apos;SLACK_WEBHOOK_URL&apos;</span>]
+      channel = <span class="hljs-string">&quot;#<span class="hljs-subst">#{ENV[<span class="hljs-string">&apos;CHANNEL_NAME&apos;</span>]}</span>&quot;</span>
+      <span class="hljs-variable">@client</span> <span class="hljs-params">||</span>= Slack::Notifier.new(webhook_url, <span class="hljs-symbol">channel:</span> channel, <span class="hljs-symbol">username:</span> user_name)
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">send_post</span><span class="hljs-params">(message)</span></span>
+      <span class="hljs-variable">@client</span>.ping(message)
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><code>Slack::SendPostService</code>をinitializeするときにuserのnicknameを引数に取り、<code>@client</code>をを作成します。
+これは先ほどの<code>slack-notifier</code>ライブラリを使用していますが、<code>Slack::Notifier.new</code>インスタンスであり、
+引数にスラックのwebhook_url、メッセージを投下するチャンネル名、そしてusernameを指定しています。</p>
+<p>そしてこの<code>@client</code>に<code>ping</code>メソッドを使用すると、該当のスラックのチャンネルにメッセージを投下するという仕組みです。</p>
+<p>それを踏まえてテストを実装すると下記のようになります。</p>
+<pre><code class="lang-ruby">it <span class="hljs-string">&apos;post to slack&apos;</span>, <span class="hljs-symbol">:vcr</span> <span class="hljs-keyword">do</span>
+  response = Slack::SendPostService.new(<span class="hljs-string">&apos;user_nickname&apos;</span>).send_post(<span class="hljs-string">&apos;test_message&apos;</span>)
+  expect(response.first.message).to eq(<span class="hljs-string">&quot;OK&quot;</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>まず、<code>response = Slack::SendPostService.new(&apos;user_nickname&apos;).send_post(&apos;test_message&apos;)</code>で<code>Slack::SendPostService</code>のインスタンスを作成して、<code>send_post</code>メソッドを呼び出しています。これでスラックにメッセージを投下することができます。</p>
+<p>投下した後はAPIからレスポンスが返されるため、それを<code>response</code>に代入しています。</p>
+<p>メッセージの投下が成功すれば<code>response</code>の中に&quot;OK&quot;というメッセージが含まれるはずなので<code>expect(response.first.message).to eq(&quot;OK&quot;)</code>として検証をしています。</p>
+<p>ではテストを実行してみましょう。
+（事前にSlack APIの設定およびenvファイルの作成と環境変数の設定が必要です）</p>
+<p>ターミナル</p>
+<pre><code class="lang-ruby"> rspec spec/service/send_post_service_spec.rb
+</code></pre>
+<p>正常に終了すれば下記のようなログが出ると思います。</p>
+<pre><code class="lang-ruby">Slack::SendPostService
+  slack alignment
+    <span class="hljs-comment">#send_post</span>
+      post to slack
+
+Finished <span class="hljs-keyword">in</span> <span class="hljs-number">0.52359</span> seconds (files took <span class="hljs-number">4.99</span> seconds to load)
+<span class="hljs-number">1</span> example, <span class="hljs-number">0</span> failures
+</code></pre>
+<p>お気づきの方もいらっしゃるかもしれませんが、先ほどのexampleを作成したときに、<code>:vcr</code>と記述しています。</p>
+<pre><code class="lang-ruby">it <span class="hljs-string">&apos;post to slack&apos;</span>, <span class="hljs-symbol">:vcr</span> <span class="hljs-keyword">do</span>
+  response = Slack::SendPostService.new(<span class="hljs-string">&apos;user_nickname&apos;</span>).send_post(<span class="hljs-string">&apos;test_message&apos;</span>)
+  expect(response.first.message).to eq(<span class="hljs-string">&quot;OK&quot;</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><code>it &apos;post to slack&apos;, :vcr do</code>の箇所です。こうすることでvcrを使用することができます。
+この状態でテストを実行すると、spec配下に<code>vcr/Slack_SendPostService/slack_alignment/_send_post/post_to_slack.yml</code>というファイルが自動生成されると思います。</p>
+<p>中身はこのようになっています。</p>
+<pre><code class="lang-ruby">---
+http_interactions:
+- request:
+    method: post
+    uri: https://hooks.slack.com/services/*************
+    body:
+      encoding: US-ASCII
+      string: payload=***************
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - &quot;*/*&quot;
+      User-Agent:
+      - Ruby
+      Content-Type:
+      - application/x-www-form-urlencoded
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Mon, 28 Mar 2022 09:25:14 GMT
+      Server:
+      - Apache
+      X-Powered-By:
+      - HHVM/4.153.0
+      X-Frame-Options:
+      - SAMEORIGIN
+      Access-Control-Allow-Origin:
+      - &quot;*&quot;
+      Referrer-Policy:
+      - no-referrer
+      X-Slack-Backend:
+      - r
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept-Encoding
+      Content-Length:
+      - &apos;22&apos;
+      Content-Type:
+      - text/html
+      X-Envoy-Upstream-Service-Time:
+      - &apos;192&apos;
+      X-Backend:
+      - main_normal main_bedrock_normal_with_overflow main_canary_with_overflow main_bedrock_canary_with_overflow
+        main_control_with_overflow main_bedrock_control_with_overflow
+      X-Server:
+      - slack-www-hhvm-main-iad-98d1
+      X-Slack-Shared-Secret-Outcome:
+      - no-match
+      Via:
+      - envoy-www-iad-9tfu, envoy-edge-nrt-3w6t
+      X-Edge-Backend:
+      - envoy-www
+      X-Slack-Edge-Shared-Secret-Outcome:
+      - no-match
+    body:
+      encoding: ASCII-8BIT
+      string: ok
+  recorded_at: Mon, 28 Mar 2022 09:25:14 GMT
+recorded_with: VCR 6.0.0
+</code></pre>
+<p>これはテストを実行した際に、スラックAPIを実際に叩いて通信をしていて、その時のリクエストとレスポンスをymlファイルとしてまとめたものになります。
+このファイルが作成された後にもう一度テストすると、今度はスラックAPIを叩くことなく、このファイルをもとにレスポンスを返してくれます。</p>
+<p>つまり、VCRは、初回のみ実際にAPIにリクエストを行い、そのリクエストと、レスポンスをもとにymlファイルを自動生成し、以降のテストはそれをスタブとして値を返すというものです。
+そのため、テストのたびに余計なリクエストを投げることがなくなります。</p>
+<p>また、自分でスタブを実装する必要がなく、自動で生成してくれるため非常に便利です。</p>
+<p>ただし、初回だけ通信が必要になるため、その通信環境が整っていなかったり、何かしらの理由でリクエストが失敗してしまったりすると、その状態でymlファイルを作成してしまうため、
+正しくテストができない可能性があります。その場合は従来通りwebmock等を使用したスタブを自身で作成することを検討する必要があります。</p>
+<p>何かしらの理由で想定外のレスポンスが返ってきた場合、vcrディレクトリを削除して再度実施すれば、もう一度実際にリクエストをしてファイルを自動生成してくれます。</p>
+<h3 id="まとめ">4.1. まとめ</h3>
+<p>単体テストの実装をモデル・外部APIを例に実装してみました。またリファクタリングのテクニックについてもご紹介しました。
+こちらがRSpecの基礎となっていくので是非抑えていただいて以降のテストに活かしていただければと思います。</p>
+<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#単体テスト">単体テスト</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#1__RSpecの導入方法">2. 1. RSpecの導入方法</a></li><li><a href="#2__Modelの単体テストの実装">3. 2. Modelの単体テストの実装</a></li><ul><li><a href="#モデルスペックの観点">3.1. モデルスペックの観点</a></li><li><a href="#ファイルの作成">3.2. ファイルの作成</a></li><li><a href="#Userモデルの要件">3.3. Userモデルの要件</a></li><ul><li><a href="#describe">3.3.1. describe</a></li><li><a href="#it">3.3.2. it</a></li></ul><li><a href="#テストを実装する">3.4. テストを実装する</a></li><ul><li><a href="#有効な属性の場合のテスト">3.4.1. 有効な属性の場合のテスト</a></li><li><a href="#expectメソッドとマッチャ">3.4.2. expectメソッドとマッチャ</a></li><li><a href="#validationのテスト">3.4.3. validationのテスト</a></li></ul><li><a href="#DRYに書く">3.5. DRYに書く</a></li><ul><li><a href="#before">3.5.1. before</a></li><li><a href="#let">3.5.2. let</a></li><li><a href="#shoulda-matchers">3.5.3. shoulda-matchers</a></li></ul><li><a href="#テストデータの作成方法">3.6. テストデータの作成方法</a></li></ul><li><a href="#3__外部APIテスト">4. 3. 外部APIテスト</a></li><ul><li><a href="#">none</a></li><ul><li><a href="#VCRの導入">4.0.1. VCRの導入</a></li></ul><li><a href="#まとめ">4.1. まとめ</a></li></ul></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
                                 
                                 </section>
                             
@@ -1102,7 +1297,7 @@ vcrの使用方法</p>
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"next":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"previous":{"title":"2.RSpecの概要解説","level":"1.3","depth":1,"path":"Section_2.md","ref":"Section_2.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_3.md","mtime":"2022-03-28T09:24:48.074Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-03-28T09:24:57.217Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"next":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"previous":{"title":"2.RSpecの概要解説","level":"1.3","depth":1,"path":"Section_2.md","ref":"Section_2.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_3.md","mtime":"2022-03-31T07:49:47.211Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-04-03T07:55:12.764Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
