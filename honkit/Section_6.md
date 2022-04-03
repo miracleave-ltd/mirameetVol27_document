@@ -179,5 +179,18 @@ RDSのエンドポイントは、Amazon RDSサービスで左ペインの「デ�
 ![スクリーンショット 2022-04-03 22 12 54](https://user-images.githubusercontent.com/52161269/161429827-daf0ebaa-8056-4980-b3fa-eaa50d6658ba.png)
 
 
+## CloudFormationの削除
+CodeBuildは、ビルド時間によって費用が発生する（従量課金）なので、削除しなくても料金は発生しません。  
+CloudFormationはNatGateWayやRDSで料金が発生する為、削除をお願いします。
+
+スタックの一覧から、削除対象を選択、削除をクリックすると削除が始まります。
+ステータスが`DELETE_COMPLETE`になると削除完了です。
+![スクリーンショット 2022-04-03 23 02 07](https://user-images.githubusercontent.com/52161269/161431695-6e47a82a-5a32-470a-9b1b-c10a32d95863.png)
+
+
+
+
+
+
 
 
