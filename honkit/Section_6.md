@@ -104,7 +104,7 @@ mirameetVol27/vpc.yml
 ```
 /mirameetVol27/rds.yml
 ```
-「スタックの名前」は`mirameet-27-rds`で作成します。（パラメータの「PJPrefix」は指定する必要はありません。）
+「スタックの名前」は`mirameet-27-rds`、パラメータの「PJPrefix」は`mirameet`で作成します。
 
 
 ***
@@ -131,9 +131,9 @@ AWS Codebuildのビルドプロジェクトの作成画面です。
 https://github.com/miracleave-ltd/mirameetVol27
 ```
 - GitHubリポジトリ・・・対象のリポジトリを選択
-
  
- ![スクリーンショット 2022-03-06 22 03 50](https://user-images.githubusercontent.com/52161269/156924513-55b56734-d3fb-4582-81fc-ef74c83fb045.png)  
+![156924513-55b56734-d3fb-4582-81fc-ef74c83fb045](https://user-images.githubusercontent.com/52161269/161430513-4cbf5176-ba68-4342-b1be-c024262da531.png)
+
 - 環境イメージ・・・AWSの用意している環境かDockerを指定する
 - オペレーティングシステム・・・OSを指定する（今回は、Ubuntu)
 - ランタイム・・・ランタイムを選択（Standardを選択）
