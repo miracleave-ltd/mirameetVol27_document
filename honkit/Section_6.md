@@ -147,14 +147,17 @@ https://github.com/miracleave-ltd/mirameetVol27
 - サブネット・・・プライベートサブネット(mirameet-private-subnet-a)を選択
 - セキュリティグループ・・・CodeBuild用のセキュリティグループを選択
 - 環境変数・・・環境変数を設定（ビルド環境に設定される）  
-RDSのエンドポイントは、RDSサービスでかくにんできます。  
-**スクショを入れる！！！！！**
 ```
 RDS_USER : dbuser
-RDS_HOSTNAME : RDSのエンドポイント
+RDS_HOSTNAME : RDSのエンドポイントをコピペ
 RDS_PASSWORD : dbpassword
 RDS_PORT : 3306
 ```
+RDSのエンドポイントは、Amazon RDSサービスで左ペインの「データベース」をクリック、  
+データベース一覧に遷移するので`mirameet-rds`をクリック後、「接続とセキュリティ」タブに記載があります。
+![スクリーンショット 2022-04-03 22 53 17](https://user-images.githubusercontent.com/52161269/161431378-19a42509-f404-430e-b2c5-cb8c56917985.png)
+
+
 
 ![スクリーンショット 2022-03-06 22 20 31](https://user-images.githubusercontent.com/52161269/156925549-8289f9b2-b85b-4f9f-bca6-1bc8ad5f5dbb.png)  
  - ビルド仕様・・・ビルドコマンドの設定（今回はBuildspecファイルを使用する）
