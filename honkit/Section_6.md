@@ -65,11 +65,23 @@ CodebuildはVPC内に設置することも可能なので、同じVPC内にRDS�
 **ポイント**
 - VPCのパブリックサブネットにはNatGatewayを設置し、インターネット接続を可能にしておく
 - CodeBuildとRDSはプライベートサブネットに設置する
-- RDSのセキュリティグループに、CodeBuildを設定するサブネットからのインバウンドルールを追加する。（この設定によってCodeBuildはRDSに接続可能になる）
+- RDSのセキュリティグループに、CodeBuildを設定するサブネットからのアクセスを追加する。（この設定によってCodeBuildはRDSに接続可能になる）
 
 Codebuild以外の上記のアーキテクトは、CloudFormationを用意しているので、サクッと作成していきましょう！
 
 #### スタックの作成
+
+##### AWSにログイン & CloudFormationのスタック作成画面に移動
+
+AWSにログイン後に、上部の検索フォームでCloudFormationのサービスへ移動します。
+![スクリーンショット 2022-04-03 16 08 53](https://user-images.githubusercontent.com/52161269/161416093-915dba3c-5b1d-4751-867b-5dc56e578acc.png)
+
+「スタックの作成」をクリックすれば、スタック作成画面へ遷移します。
+![スクリーンショット 2022-04-03 16 19 08](https://user-images.githubusercontent.com/52161269/161416368-1827bb55-a70b-4960-bf11-e7c735b24159.png)
+
+##### vpcのスタックを作成する
+
+
 
 
 ***
