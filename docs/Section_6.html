@@ -264,6 +264,7 @@
 <li>ビルドプロジェクトを作成する</li>
 <li>CodeBuildでビルドを実行する</li>
 </ul>
+<p><strong>※以下のハンズオンは、AWSサービスの料金（100円程度）が発生します。<br>実施後の費用発生を防止する為にに必ず最後の「CloudFormationの削除」を実施してください。</strong></p>
 <h2 id="AWS_CodeBuildの解説">2. AWS CodeBuildの解説</h2>
 <p> AWSで提供されているクラウドサーバー上で、プロジェクトのテストとビルドができるサービス。<br> Rubyの他にJava、Go, pythonなどに対応。<br> また、他のサービス（AWS CodeCommitやCodeDeploy）と組み合わせて利用することも可能。</p>
 <h3 id="AWS_CodeBuildの仕組み">2.1. AWS CodeBuildの仕組み</h3>
@@ -324,9 +325,9 @@
 <h4 id="スタックの作成">3.1.4. スタックの作成</h4>
 <p>ステップ４のレビューまで「次へ」をクリックします。ステップ４まできたら下部にある「スタックの作成」をクリックします。</p>
 <h4 id="RDSのスタック作成">3.1.5. RDSのスタック作成</h4>
-<p>スタックの作成が完了したら、RDSのスタックを作成します。<br>上記と同じ流れで作成します。<br>テンプレートは<code>rds.yml</code><br>ファイルパス：  </p>
+<p>スタックの作成が完了したら、上記と同じ流れでRDSのスタックを作成します。<br>テンプレートは<code>rds.yml</code><br>ファイルパス：  </p>
 <pre><code>/mirameetVol27/rds.yml
-</code></pre><p>「スタックの名前」は<code>mirameet-27-rds</code>で作成します。（パラメータの「PJPrefix」は指定する必要はありません。）</p>
+</code></pre><p>「スタックの名前」は<code>mirameet-27-rds</code>、パラメータの「PJPrefix」は<code>mirameet</code>で作成します。</p>
 <hr>
 <h3 id="ビルドプロジェクトの作成">3.2. ビルドプロジェクトの作成</h3>
 <p>ビルドプロジェクトでVPCを指定する必要があるので、事前にVPC・サブネット・RDSを作成しておきましょう。<br>AWS Codebuildのビルドプロジェクトの作成画面です。</p>
@@ -334,17 +335,19 @@
 <ul>
 <li>プロジェクト名・・・ プロジェクト名を指定する（今回はmirameetVol27)</li>
 </ul>
-<p><img src="https://user-images.githubusercontent.com/52161269/160341256-61fa7819-164b-43b3-a197-855e81a8c67d.png" alt="スクリーンショット 2022-03-28 15 44 49"></p>
+<p><img src="https://user-images.githubusercontent.com/52161269/161428922-1945e1e9-2d59-4696-bd2d-e2383eaf67e3.png" alt="スクリーンショット 2022-04-03 21 48 48"></p>
 <ul>
-<li>ソースプロバイダ・・・GitHubやBitbucketなど　ソース共有ツールを指定する（今回はGitHub)<ul>
-<li>リポジトリ・・・ソースのリポジトリの種別（PublicリポジトリかPrivateリポジトリか）を選択<br>（今回のmirameetVol27はパブリックリポジトリ）</li>
+<li>ソースプロバイダ・・・GitHubやBitbucketなど　ソース共有ツールを指定する（今回はGitHub)</li>
+<li>リポジトリ・・・GitHub の個人用アクセストークンで接続するを選択  </li>
+<li>GitHub の個人用アクセストークン・・・以下を参考に個人用アクセストークンを作成して貼り付けて「トークンの保存」をクリック<br><a href="https://docs.github.com/ja/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token" target="_blank">GitHubの個人用アクセストークンの作成</a></li>
 </ul>
-</li>
+<p><img src="https://user-images.githubusercontent.com/52161269/161429138-cd41e1af-71aa-4e62-a44b-2577fdd8d06b.png" alt="スクリーンショット 2022-04-03 21 55 20"></p>
+<ul>
+<li>ソースのリポジトリの種別（PublicリポジトリかPrivateリポジトリか）を選択・・・GitHubの接続が完了したら選択する<br>（今回はパブリックリポジトリ）<pre><code>https://github.com/miracleave-ltd/mirameetVol27
+</code></pre></li>
+<li>GitHubリポジトリ・・・対象のリポジトリを選択</li>
 </ul>
-<pre><code>https://github.com/miracleave-ltd/mirameetVol27
-</code></pre><ul>
-<li><p>GitHubリポジトリ・・・対象のリポジトリを選択</p>
-<p><img src="https://user-images.githubusercontent.com/52161269/156924513-55b56734-d3fb-4582-81fc-ef74c83fb045.png" alt="スクリーンショット 2022-03-06 22 03 50">  </p>
+<p><img src="https://user-images.githubusercontent.com/52161269/161430513-4cbf5176-ba68-4342-b1be-c024262da531.png" alt="156924513-55b56734-d3fb-4582-81fc-ef74c83fb045"></p>
 <ul>
 <li>環境イメージ・・・AWSの用意している環境かDockerを指定する</li>
 <li>オペレーティングシステム・・・OSを指定する（今回は、Ubuntu)</li>
@@ -352,15 +355,18 @@
 <li>イメージ・・・イメージを選択(aws/codebuild/standard:4.0)</li>
 <li>特権付与・・・docker-composeでビルドする際はチェックを入れる</li>
 </ul>
-</li>
-</ul>
 <p><img src="https://user-images.githubusercontent.com/52161269/156926221-27c45b16-ee1d-4682-8bb9-90ca5b5aa617.png" alt="スクリーンショット 2022-03-06 22 49 09">
 <img src="https://user-images.githubusercontent.com/52161269/160338195-a1f79fab-597a-47d3-bab3-61a9b99094ce.png" alt="スクリーンショット 2022-03-28 15 22 18"></p>
 <ul>
 <li>VPC・・・事前に作成したVPCを選択</li>
-<li>サブネット・・・プライベートサブネットを選択</li>
+<li>サブネット・・・プライベートサブネット(mirameet-private-subnet-a)を選択</li>
 <li>セキュリティグループ・・・CodeBuild用のセキュリティグループを選択</li>
-<li>環境変数・・・環境変数を設定（ビルド環境に設定される）</li>
+<li>環境変数・・・環境変数を設定（ビルド環境に設定される）  <pre><code>RDS_USER : dbuser
+RDS_HOSTNAME : RDSのエンドポイントをコピペ
+RDS_PASSWORD : dbpassword
+RDS_PORT : 3306
+</code></pre>RDSのエンドポイントは、Amazon RDSサービスで左ペインの「データベース」をクリック、<br>データベース一覧に遷移するので<code>mirameet-rds</code>をクリック後、「接続とセキュリティ」タブに記載があります。
+<img src="https://user-images.githubusercontent.com/52161269/161431378-19a42509-f404-430e-b2c5-cb8c56917985.png" alt="スクリーンショット 2022-04-03 22 53 17"></li>
 </ul>
 <p><img src="https://user-images.githubusercontent.com/52161269/156925549-8289f9b2-b85b-4f9f-bca6-1bc8ad5f5dbb.png" alt="スクリーンショット 2022-03-06 22 20 31">  </p>
 <ul>
@@ -373,8 +379,15 @@
 <li>ビルドプロジェクト一覧から、プロジェクトをクリック</li>
 <li>「ビルドを開始」ボタンをクリック</li>
 </ol>
-<p>ビルドには、５分ほどかかります。</p>
-<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#AWS_CodeBuildでテスト＆ビルドする">AWS CodeBuildでテスト＆ビルドする</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#AWS_CodeBuildの解説">2. AWS CodeBuildの解説</a></li><ul><li><a href="#AWS_CodeBuildの仕組み">2.1. AWS CodeBuildの仕組み</a></li><li><a href="#AWS_CodeBuildの処理の流れ">2.2. AWS CodeBuildの処理の流れ</a></li><li><a href="#buildspec_yml">2.3. buildspec.yml</a></li></ul><li><a href="#ビルドプロジェクトを設定する">3. ビルドプロジェクトを設定する</a></li><ul><li><a href="#今回使用するAWSのアーキテクトの確認">3.1. 今回使用するAWSのアーキテクトの確認</a></li><ul><li><a href="#AWSにログイン___CloudFormationのスタック作成画面に移動">3.1.1. AWSにログイン &amp; CloudFormationのスタック作成画面に移動</a></li><li><a href="#テンプレートの指定">3.1.2. テンプレートの指定</a></li><li><a href="#スタックの詳細設定">3.1.3. スタックの詳細設定</a></li><li><a href="#スタックの作成">3.1.4. スタックの作成</a></li><li><a href="#RDSのスタック作成">3.1.5. RDSのスタック作成</a></li></ul><li><a href="#ビルドプロジェクトの作成">3.2. ビルドプロジェクトの作成</a></li></ul><li><a href="#CodeBuildでビルドを実行する">4. CodeBuildでビルドを実行する</a></li></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
+<p>ビルドには５分ほどかかります。<br>成功すると、ビルドステータスに「成功」と表示されます。<br><img src="https://user-images.githubusercontent.com/52161269/161429782-e0ea9cad-a578-4edf-8101-0a57f74815b8.png" alt="スクリーンショット 2022-04-03 22 11 39"></p>
+<p>ログは以下のように出力されます。
+<img src="https://user-images.githubusercontent.com/52161269/161429827-daf0ebaa-8056-4980-b3fa-eaa50d6658ba.png" alt="スクリーンショット 2022-04-03 22 12 54"></p>
+<h2 id="CloudFormationの削除（費用発生を防ぐ為に必ず実施してください）">5. CloudFormationの削除（費用発生を防ぐ為に必ず実施してください）</h2>
+<p>CodeBuildは、ビルド時間によって費用が発生する（従量課金）なので、削除しなくても料金は発生しません。<br>CloudFormationはNatGateWayやRDSで料金が発生する為、削除をお願いします。</p>
+<p>スタックの一覧から、削除対象を選択、削除をクリックすると削除が始まります。
+ステータスが<code>DELETE_COMPLETE</code>になると削除完了です。
+<img src="https://user-images.githubusercontent.com/52161269/161431695-6e47a82a-5a32-470a-9b1b-c10a32d95863.png" alt="スクリーンショット 2022-04-03 23 02 07"></p>
+<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#AWS_CodeBuildでテスト＆ビルドする">AWS CodeBuildでテスト＆ビルドする</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#AWS_CodeBuildの解説">2. AWS CodeBuildの解説</a></li><ul><li><a href="#AWS_CodeBuildの仕組み">2.1. AWS CodeBuildの仕組み</a></li><li><a href="#AWS_CodeBuildの処理の流れ">2.2. AWS CodeBuildの処理の流れ</a></li><li><a href="#buildspec_yml">2.3. buildspec.yml</a></li></ul><li><a href="#ビルドプロジェクトを設定する">3. ビルドプロジェクトを設定する</a></li><ul><li><a href="#今回使用するAWSのアーキテクトの確認">3.1. 今回使用するAWSのアーキテクトの確認</a></li><ul><li><a href="#AWSにログイン___CloudFormationのスタック作成画面に移動">3.1.1. AWSにログイン &amp; CloudFormationのスタック作成画面に移動</a></li><li><a href="#テンプレートの指定">3.1.2. テンプレートの指定</a></li><li><a href="#スタックの詳細設定">3.1.3. スタックの詳細設定</a></li><li><a href="#スタックの作成">3.1.4. スタックの作成</a></li><li><a href="#RDSのスタック作成">3.1.5. RDSのスタック作成</a></li></ul><li><a href="#ビルドプロジェクトの作成">3.2. ビルドプロジェクトの作成</a></li></ul><li><a href="#CodeBuildでビルドを実行する">4. CodeBuildでビルドを実行する</a></li><li><a href="#CloudFormationの削除（費用発生を防ぐ為に必ず実施してください）">5. CloudFormationの削除（費用発生を防ぐ為に必ず実施してください）</a></li></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
                                 
                                 </section>
                             
@@ -417,7 +430,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"next":{"title":"7.まとめ","level":"1.8","depth":1,"path":"Section_7.md","ref":"Section_7.md","articles":[]},"previous":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_6.md","mtime":"2022-04-03T12:28:35.684Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-04-03T12:28:47.636Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"next":{"title":"7.まとめ","level":"1.8","depth":1,"path":"Section_7.md","ref":"Section_7.md","articles":[]},"previous":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_6.md","mtime":"2022-04-03T14:24:22.826Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-04-03T14:24:34.291Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
