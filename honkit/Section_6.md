@@ -5,6 +5,9 @@
 - ビルドプロジェクトを作成する
 - CodeBuildでビルドを実行する
 
+**※以下のハンズオンは、AWSサービスの料金（100円程度）が発生します。  
+実施後の費用発生を防止する為にに必ず最後の「CloudFormationの削除」を実施してください。**
+
 ## AWS CodeBuildの解説
  AWSで提供されているクラウドサーバー上で、プロジェクトのテストとビルドができるサービス。  
  Rubyの他にJava、Go, pythonなどに対応。  
@@ -179,7 +182,7 @@ RDSのエンドポイントは、Amazon RDSサービスで左ペインの「デ�
 ![スクリーンショット 2022-04-03 22 12 54](https://user-images.githubusercontent.com/52161269/161429827-daf0ebaa-8056-4980-b3fa-eaa50d6658ba.png)
 
 
-## CloudFormationの削除
+## CloudFormationの削除（費用発生を防ぐ為に必ず実施してください）
 CodeBuildは、ビルド時間によって費用が発生する（従量課金）なので、削除しなくても料金は発生しません。  
 CloudFormationはNatGateWayやRDSで料金が発生する為、削除をお願いします。
 
