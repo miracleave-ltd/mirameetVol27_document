@@ -31,7 +31,7 @@
  
 ### buildspec.yml
   ビルド環境で実行するコマンドなどを記載するyaml形式のファイル。  
-
+パス：`mirameetVol27/buildspec.yml`
   ```
   version: 0.2   ・・・buildspecのバージョンを指定（最新の0.2を使用）
   phases:
@@ -98,7 +98,11 @@ mirameetVol27/vpc.yml
 
 
 #### スタックの作成
-ステップ４のレビューまで「次へ」をクリックします。ステップ４まできたら下部にある「スタックの作成」をクリックします。
+ステップ４のレビューまで「次へ」をクリックします。  
+ステップ４まできたら下部にある「スタックの作成」をクリックします。  
+作成が完了すると、ステータスは`CREATE_COMPLETE`になります。
+![スクリーンショット 2022-04-03 23 40 11](https://user-images.githubusercontent.com/52161269/161433375-41bf145a-8d11-4f1c-b4a5-17deced1567a.png)
+
 
 #### RDSのスタック作成
 スタックの作成が完了したら、上記と同じ流れでRDSのスタックを作成します。  
@@ -108,7 +112,6 @@ mirameetVol27/vpc.yml
 /mirameetVol27/rds.yml
 ```
 「スタックの名前」は`mirameet-27-rds`、パラメータの「PJPrefix」は`mirameet`で作成します。
-
 
 ***
 
