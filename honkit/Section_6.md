@@ -67,11 +67,9 @@ CodebuildはVPC内に設置することも可能なので、同じVPC内にRDS�
 - CodeBuildとRDSはプライベートサブネットに設置する
 - RDSのセキュリティグループに、CodeBuildを設定するサブネットからのアクセスを追加する。（この設定によってCodeBuildはRDSに接続可能になる）
 
-Codebuild以外の上記のアーキテクトは、CloudFormationを用意しているので、サクッと作成していきましょう！
-
-#### スタックの作成
-
-##### AWSにログイン & CloudFormationのスタック作成画面に移動
+**CodeBuild以外の上記のアーキテクトは、CloudFormationを用意しているのでサクッと作成していきましょう！**
+***
+#### AWSにログイン & CloudFormationのスタック作成画面に移動
 
 AWSにログイン後に、上部の検索フォームでCloudFormationのサービスへ移動します。
 ![スクリーンショット 2022-04-03 16 08 53](https://user-images.githubusercontent.com/52161269/161416093-915dba3c-5b1d-4751-867b-5dc56e578acc.png)
@@ -79,9 +77,24 @@ AWSにログイン後に、上部の検索フォームでCloudFormationのサー
 「スタックの作成」をクリックすれば、スタック作成画面へ遷移します。
 ![スクリーンショット 2022-04-03 16 19 08](https://user-images.githubusercontent.com/52161269/161416368-1827bb55-a70b-4960-bf11-e7c735b24159.png)
 
-##### vpcのスタックを作成する
+#### テンプレートの指定
+
+`テンプレートファイルのアップロード`を選択、project直下にある`vpc.yml`を選択し、「次へ」をクリックします。  
+ファイルパス:
+```
+mirameetVol27/vpc.yml
+```
+![スクリーンショット 2022-04-03 19 02 38](https://user-images.githubusercontent.com/52161269/161422485-e469bd29-fb3a-4dbb-84c1-09eaaf34f0d2.png)
 
 
+#### スタックの詳細設定
+
+「スタックの名前」は`mirameet-27-vpc`パラメータの「PJPrefix」は`mirameet`とし、「次へ」をクリックします。
+![スクリーンショット 2022-04-03 19 08 02](https://user-images.githubusercontent.com/52161269/161422439-58e54002-3e9d-4439-b3b8-0ada6d8f3060.png)
+
+
+#### スタックの作成
+ステップ４のレビューまで「次へ」をクリックします。ステップ４まできたら下部にある「スタックの作成」をクリックします。
 
 
 ***
