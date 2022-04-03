@@ -98,8 +98,7 @@ mirameetVol27/vpc.yml
 ステップ４のレビューまで「次へ」をクリックします。ステップ４まできたら下部にある「スタックの作成」をクリックします。
 
 #### RDSのスタック作成
-スタックの作成が完了したら、RDSのスタックを作成します。  
-上記と同じ流れで作成します。  
+スタックの作成が完了したら、上記と同じ流れでRDSのスタックを作成します。  
 テンプレートは`rds.yml`  
 ファイルパス：  
 ```
@@ -117,17 +116,22 @@ AWS Codebuildのビルドプロジェクトの作成画面です。
 
 ![スクリーンショット 2022-03-28 15 43 07](https://user-images.githubusercontent.com/52161269/160341003-33a70d0e-9a81-46aa-a87f-0f753e34a2c5.png)
 - プロジェクト名・・・ プロジェクト名を指定する（今回はmirameetVol27)
-  
-![スクリーンショット 2022-03-28 15 44 49](https://user-images.githubusercontent.com/52161269/160341256-61fa7819-164b-43b3-a197-855e81a8c67d.png)
-- ソースプロバイダ・・・GitHubやBitbucketなど　ソース共有ツールを指定する（今回はGitHub)
- - リポジトリ・・・ソースのリポジトリの種別（PublicリポジトリかPrivateリポジトリか）を選択  
-（今回のmirameetVol27はパブリックリポジトリ）
 
+![スクリーンショット 2022-04-03 21 48 48](https://user-images.githubusercontent.com/52161269/161428922-1945e1e9-2d59-4696-bd2d-e2383eaf67e3.png)
+- ソースプロバイダ・・・GitHubやBitbucketなど　ソース共有ツールを指定する（今回はGitHub)
+- リポジトリ・・・GitHub の個人用アクセストークンで接続するを選択  
+- GitHub の個人用アクセストークン・・・以下を参考に個人用アクセストークンを作成して貼り付けて「トークンの保存」をクリック  
+[GitHubの個人用アクセストークンの作成](https://docs.github.com/ja/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+
+
+![スクリーンショット 2022-04-03 21 55 20](https://user-images.githubusercontent.com/52161269/161429138-cd41e1af-71aa-4e62-a44b-2577fdd8d06b.png)
+- ソースのリポジトリの種別（PublicリポジトリかPrivateリポジトリか）を選択・・・GitHubの接続が完了したら選択する  
+（今回はパブリックリポジトリ）
 ```
 https://github.com/miracleave-ltd/mirameetVol27
 ```
+- GitHubリポジトリ・・・対象のリポジトリを選択
 
- - GitHubリポジトリ・・・対象のリポジトリを選択
  
  ![スクリーンショット 2022-03-06 22 03 50](https://user-images.githubusercontent.com/52161269/156924513-55b56734-d3fb-4582-81fc-ef74c83fb045.png)  
 - 環境イメージ・・・AWSの用意している環境かDockerを指定する
@@ -140,9 +144,17 @@ https://github.com/miracleave-ltd/mirameetVol27
 ![スクリーンショット 2022-03-06 22 49 09](https://user-images.githubusercontent.com/52161269/156926221-27c45b16-ee1d-4682-8bb9-90ca5b5aa617.png)
 ![スクリーンショット 2022-03-28 15 22 18](https://user-images.githubusercontent.com/52161269/160338195-a1f79fab-597a-47d3-bab3-61a9b99094ce.png)
 - VPC・・・事前に作成したVPCを選択
-- サブネット・・・プライベートサブネットを選択
+- サブネット・・・プライベートサブネット(mirameet-private-subnet-a)を選択
 - セキュリティグループ・・・CodeBuild用のセキュリティグループを選択
-- 環境変数・・・環境変数を設定（ビルド環境に設定される）
+- 環境変数・・・環境変数を設定（ビルド環境に設定される）  
+RDSのエンドポイントは、RDSサービスでかくにんできます。  
+**スクショを入れる！！！！！**
+```
+RDS_USER : dbuser
+RDS_HOSTNAME : RDSのエンドポイント
+RDS_PASSWORD : dbpassword
+RDS_PORT : 3306
+```
 
 ![スクリーンショット 2022-03-06 22 20 31](https://user-images.githubusercontent.com/52161269/156925549-8289f9b2-b85b-4f9f-bca6-1bc8ad5f5dbb.png)  
  - ビルド仕様・・・ビルドコマンドの設定（今回はBuildspecファイルを使用する）
@@ -156,12 +168,12 @@ https://github.com/miracleave-ltd/mirameetVol27
 1. ビルドプロジェクト一覧から、プロジェクトをクリック
 2. 「ビルドを開始」ボタンをクリック
 
-ビルドには、５分ほどかかります。
+ビルドには５分ほどかかります。  
+成功すると、ビルドステータスに「成功」と表示されます。  
+![スクリーンショット 2022-04-03 22 11 39](https://user-images.githubusercontent.com/52161269/161429782-e0ea9cad-a578-4edf-8101-0a57f74815b8.png)
 
-
-
-
-
+ログは以下のように出力されます。
+![スクリーンショット 2022-04-03 22 12 54](https://user-images.githubusercontent.com/52161269/161429827-daf0ebaa-8056-4980-b3fa-eaa50d6658ba.png)
 
 
 
