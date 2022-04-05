@@ -30,10 +30,12 @@ rails g rspec:install
 
 下記のようにディレクトリ・ファイルが作成されれば完了です。
 
+```
 create  .rspec
 create  spec
 create  spec/spec_helper.rb
 create  spec/rails_helper.rb
+```
 
 ※RSpecの設定は各種ありますが、今回は割愛します。
 
@@ -82,7 +84,7 @@ RSpec.describe User, type: :model do
   it "emailが空文字の場合、無効であること"
   it "emailが既に保存されている場合、無効であること"
   it "emailがemailの形式ではない場合、無効な状態であること"
-  it "emailは全角文字を使用する場合、無効な状態であること" do
+  it "emailは全角文字を使用する場合、無効な状態であること"
   it "passwordがnilの場合、無効であること"
   it "passwordが空文字の場合、無効であること"
   it "passwordが5文字以内の場合、無効であること"
@@ -259,7 +261,45 @@ it "nicknameが10文字以内の場合、有効であること"
 it "nicknameが11文字以上の場合、無効であること"
 ```
 
+##### ハンズオン
 では実際にテストを実装してみましょう。
+
+```ruby
+require 'rails_helper'
+
+RSpec.describe User, type: :model do
+  # 有効な属性の場合のテスト
+
+  ## 省略
+
+ describe 'nickname' do
+  it 'nilの場合、無効であること' do
+    # nicknameがnilのインスタンスを作成して、無効であることをテストする。
+  end
+
+  it '空文字の場合、無効であること' do
+  　　　　# nicknameが「''」のインスタンスを作成して、無効であることをテストする。（無効な場合はエラー文が含まれているかテストする）
+  end
+
+  it 'すでに使用されているnicknameの場合、保存できないこと' do
+  　　　　# 最初にuserインスタンスを保存する。
+　　　　　　　　# 次に最初に作成したuserインスタンスと同じnicknameを持ったuserインスタンスを新しく作成する。
+　　　　　　　　# そのインスタンスが無効であることをテストする。（無効な場合はエラー文が含まれているかテストする）
+  end
+
+  it '10文字以内の場合、有効であること' do
+  　　　　# nicknameが10文字のuserインスタンスを作成し、有効であるかテストする。
+  end
+
+  it '11文字以上の場合、無効であること' do
+  　　　　# nicknameが11文字のuserインスタンスを作成し、無効であるかテストする。（無効な場合はエラー文が含まれているかテストする）
+  end
+ end
+end
+
+```
+
+##### 解答例
 
 ```ruby
 require 'rails_helper'
@@ -357,6 +397,7 @@ Finished in 1.19 seconds (files took 4.51 seconds to load)
 
 となっていればテスト成功です。
 
+では解説していきます。
 まず、何をテストするかを明示的に示すため、`describe`を使用します。
 
 ```ruby
@@ -838,7 +879,62 @@ Userインスタンスは作成できないことを期待していますが、�
 他にもたくさんのマッチャがあるので是非下記を参考にしてみてください。
 https://github.com/thoughtbot/shoulda-matchers
 
+
+##### ハンズオン
 では一度ここまでの知識で`user_spec.rb`をリファクタリングしてみましょう。
+
+```ruby
+require 'rails_helper'
+
+RSpec.describe User, type: :model do
+  it "nickname, email, password, password_confirmationがあれば有効であること" do
+    user = User.new(
+      nickname: 'Takashi',
+      email: 'tester@example.com',
+      password: 'p@ssword!!',
+      password_confirmation: 'p@ssword!!',
+    )
+    expect(user).to be_valid
+  end
+
+  describe 'アソシエーション' do
+    # shoulda-matchersを使用して、postモデルとのアソシエーションをテストする。
+    # shoulda-matchersを使用して、commentモデルとのアソシエーションをテストする。
+  end
+
+  describe 'nickname' do
+    it { is_expected.to validate_presence_of :nickname }
+    it { is_expected.to validate_uniqueness_of :nickname }
+    it { is_expected.to validate_length_of(:nickname).is_at_most(10) }
+  end
+
+  describe 'email' do
+    # shoulda-matchersを使用して、emailが必須項目であることをテストする。
+    # shoulda-matchersを使用して、emailがユニークであることをテストする。
+
+    it 'emailの形式ではない場合、無効な状態であること' do
+      # emailが正しい形式ではないuserインスタンスを作成して、無効であるかテストする。
+    end
+
+    it 'emailは全角文字を使用する場合、無効な状態であること' do
+      # emailが全角入力のuserインスタンスを作成して、無効であるかテストする。
+    end
+  end
+
+  describe 'password' do
+    # shoulda-matchersを使用して、passwordが必須項目であることをテストする。
+    # shoulda-matchersを使用して、passwordが6文字以上128文字以内で有効なことをテストする。
+    # shoulda-matchersを使用して、password_confirmationが必須項目であることをテストする。
+
+    it 'passwordとpassword_confirmationが不一致の場合、無効な状態であること' do
+    　　# passwordの値とpassword_confirmationの値が一致しないuserインスタンスを作成して、無効であるかテストする。
+    end
+  end
+end
+
+```
+
+##### 解答例
 
 ```ruby
 require 'rails_helper'
@@ -868,14 +964,25 @@ RSpec.describe User, type: :model do
   describe 'email' do
     it { is_expected.to validate_presence_of :email }
     it { is_expected.to validate_uniqueness_of(:email).case_insensitive }
+    
     it 'emailの形式ではない場合、無効な状態であること' do
-      user = build(:user, email: 'example_no_email')
+    　　　user = User.new(
+      　　nickname: 'Takashi',
+      　　email: 'example_no_email',   # 無効なemailアドレス
+      　　password: 'p@ssword!!',
+      　　password_confirmation: 'p@ssword!!',
+    　　　　)
       user.valid?
       expect(user.errors[:email]).to include("は不正な値です") #invalid
     end
 
     it 'emailは全角文字を使用する場合、無効な状態であること' do
-      user = build(:user, email: 'ｅｘａｐｌｅ@gmail.com')
+      user = User.new(
+        nickname: 'Takashi',
+      　　 email: 'ｅｘａｐｌｅ@gmail.com',   # 全角
+      　　 password: 'p@ssword!!',
+      　　 password_confirmation: 'p@ssword!!',
+    　　　　)
       user.valid?
       expect(user.errors[:email]).to include("は不正な値です") #invalid
     end
@@ -887,7 +994,12 @@ RSpec.describe User, type: :model do
     it { is_expected.to validate_presence_of :password_confirmation }
 
     it 'passwordとpassword_confirmationが不一致の場合、無効な状態であること' do
-      user = build(:user, password: 'password', password_confirmation: 'password_confirmation')
+      user = User.new(
+        nickname: 'Takashi',
+      　　 email: 'ｅｘａｐｌｅ@gmail.com',
+      　　 password: 'password',
+      　　 password_confirmation: 'password_confirmation',  # passwordと異なる
+    　　　　)
       user.valid?
       expect(user.errors[:password_confirmation]).to include("とパスワードの入力が一致しません") #confirmation
     end
