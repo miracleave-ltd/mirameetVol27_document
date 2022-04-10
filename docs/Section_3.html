@@ -282,11 +282,11 @@
 <pre><code class="lang-ruby">rails g <span class="hljs-symbol">rspec:</span>install
 </code></pre>
 <p>下記のようにディレクトリ・ファイルが作成されれば完了です。</p>
-<p>create  .rspec
+<pre><code>create  .rspec
 create  spec
 create  spec/spec_helper.rb
-create  spec/rails_helper.rb</p>
-<p>※RSpecの設定は各種ありますが、今回は割愛します。</p>
+create  spec/rails_helper.rb
+</code></pre><p>※RSpecの設定は各種ありますが、今回は割愛します。</p>
 <h2 id="2__Modelの単体テストの実装">3. 2. Modelの単体テストの実装</h2>
 <h3 id="モデルスペックの観点">3.1. モデルスペックの観点</h3>
 <p>モデルスペックでは以下のような観点で実装をします。</p>
@@ -324,7 +324,7 @@ RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-sy
   it <span class="hljs-string">&quot;emailが空文字の場合、無効であること&quot;</span>
   it <span class="hljs-string">&quot;emailが既に保存されている場合、無効であること&quot;</span>
   it <span class="hljs-string">&quot;emailがemailの形式ではない場合、無効な状態であること&quot;</span>
-  it <span class="hljs-string">&quot;emailは全角文字を使用する場合、無効な状態であること&quot;</span> <span class="hljs-keyword">do</span>
+  it <span class="hljs-string">&quot;emailは全角文字を使用する場合、無効な状態であること&quot;</span>
   it <span class="hljs-string">&quot;passwordがnilの場合、無効であること&quot;</span>
   it <span class="hljs-string">&quot;passwordが空文字の場合、無効であること&quot;</span>
   it <span class="hljs-string">&quot;passwordが5文字以内の場合、無効であること&quot;</span>
@@ -453,7 +453,41 @@ it <span class="hljs-string">&quot;nicknameが既に保存されている場合�
 it <span class="hljs-string">&quot;nicknameが10文字以内の場合、有効であること&quot;</span>
 it <span class="hljs-string">&quot;nicknameが11文字以上の場合、無効であること&quot;</span>
 </code></pre>
+<h5 id="ハンズオン"><a name="ハンズオン" class="plugin-anchor" href="#ハンズオン"><i class="fa fa-link" aria-hidden="true"></i></a>ハンズオン</h5>
 <p>では実際にテストを実装してみましょう。</p>
+<pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
+
+RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-symbol">:model</span> <span class="hljs-keyword">do</span>
+  <span class="hljs-comment"># 有効な属性の場合のテスト</span>
+
+  <span class="hljs-comment">## 省略</span>
+
+ describe <span class="hljs-string">&apos;nickname&apos;</span> <span class="hljs-keyword">do</span>
+  it <span class="hljs-string">&apos;nilの場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+    <span class="hljs-comment"># nicknameがnilのインスタンスを作成して、無効であることをテストする。</span>
+  <span class="hljs-keyword">end</span>
+
+  it <span class="hljs-string">&apos;空文字の場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+  　　　　<span class="hljs-comment"># nicknameが「&apos;&apos;」のインスタンスを作成して、無効であることをテストする。（無効な場合はエラー文が含まれているかテストする）</span>
+  <span class="hljs-keyword">end</span>
+
+  it <span class="hljs-string">&apos;すでに使用されているnicknameの場合、保存できないこと&apos;</span> <span class="hljs-keyword">do</span>
+  　　　　<span class="hljs-comment"># 最初にuserインスタンスを保存する。</span>
+　　　　　　　　<span class="hljs-comment"># 次に最初に作成したuserインスタンスと同じnicknameを持ったuserインスタンスを新しく作成する。</span>
+　　　　　　　　<span class="hljs-comment"># そのインスタンスが無効であることをテストする。（無効な場合はエラー文が含まれているかテストする）</span>
+  <span class="hljs-keyword">end</span>
+
+  it <span class="hljs-string">&apos;10文字以内の場合、有効であること&apos;</span> <span class="hljs-keyword">do</span>
+  　　　　<span class="hljs-comment"># nicknameが10文字のuserインスタンスを作成し、有効であるかテストする。</span>
+  <span class="hljs-keyword">end</span>
+
+  it <span class="hljs-string">&apos;11文字以上の場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
+  　　　　<span class="hljs-comment"># nicknameが11文字のuserインスタンスを作成し、無効であるかテストする。（無効な場合はエラー文が含まれているかテストする）</span>
+  <span class="hljs-keyword">end</span>
+ <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h5 id="解答例"><a name="解答例" class="plugin-anchor" href="#解答例"><i class="fa fa-link" aria-hidden="true"></i></a>解答例</h5>
 <pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
 
 RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-symbol">:model</span> <span class="hljs-keyword">do</span>
@@ -541,7 +575,8 @@ Finished <span class="hljs-keyword">in</span> <span class="hljs-number">1.19</sp
 <span class="hljs-number">5</span> examples, <span class="hljs-number">0</span> failures
 </code></pre>
 <p>となっていればテスト成功です。</p>
-<p>まず、何をテストするかを明示的に示すため、<code>describe</code>を使用します。</p>
+<p>では解説していきます。
+まず、何をテストするかを明示的に示すため、<code>describe</code>を使用します。</p>
 <pre><code class="lang-ruby">describe <span class="hljs-string">&apos;nickname&apos;</span> <span class="hljs-keyword">do</span>
 </code></pre>
 <p>これでこのブロックはnicknameのテストを実装しているんだな、と理解できるようになります。
@@ -932,7 +967,57 @@ Userインスタンスは作成できないことを期待していますが、�
 <code>.is_at_most(10)</code>の数字を9や11などにしたときにどのように動作するか確かめてもいいかもしれません。</p>
 <p>他にもたくさんのマッチャがあるので是非下記を参考にしてみてください。
 <a href="https://github.com/thoughtbot/shoulda-matchers" target="_blank">https://github.com/thoughtbot/shoulda-matchers</a></p>
+<h5 id="ハンズオン"><a name="ハンズオン" class="plugin-anchor" href="#ハンズオン"><i class="fa fa-link" aria-hidden="true"></i></a>ハンズオン</h5>
 <p>では一度ここまでの知識で<code>user_spec.rb</code>をリファクタリングしてみましょう。</p>
+<pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
+
+RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-symbol">:model</span> <span class="hljs-keyword">do</span>
+  it <span class="hljs-string">&quot;nickname, email, password, password_confirmationがあれば有効であること&quot;</span> <span class="hljs-keyword">do</span>
+    user = User.new(
+      <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+      <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+      <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    )
+    expect(user).to be_valid
+  <span class="hljs-keyword">end</span>
+
+  describe <span class="hljs-string">&apos;アソシエーション&apos;</span> <span class="hljs-keyword">do</span>
+    <span class="hljs-comment"># shoulda-matchersを使用して、postモデルとのアソシエーションをテストする。</span>
+    <span class="hljs-comment"># shoulda-matchersを使用して、commentモデルとのアソシエーションをテストする。</span>
+  <span class="hljs-keyword">end</span>
+
+  describe <span class="hljs-string">&apos;nickname&apos;</span> <span class="hljs-keyword">do</span>
+    it { is_expected.to validate_presence_of <span class="hljs-symbol">:nickname</span> }
+    it { is_expected.to validate_uniqueness_of <span class="hljs-symbol">:nickname</span> }
+    it { is_expected.to validate_length_of(<span class="hljs-symbol">:nickname</span>).is_at_most(<span class="hljs-number">10</span>) }
+  <span class="hljs-keyword">end</span>
+
+  describe <span class="hljs-string">&apos;email&apos;</span> <span class="hljs-keyword">do</span>
+    <span class="hljs-comment"># shoulda-matchersを使用して、emailが必須項目であることをテストする。</span>
+    <span class="hljs-comment"># shoulda-matchersを使用して、emailがユニークであることをテストする。</span>
+
+    it <span class="hljs-string">&apos;emailの形式ではない場合、無効な状態であること&apos;</span> <span class="hljs-keyword">do</span>
+      <span class="hljs-comment"># emailが正しい形式ではないuserインスタンスを作成して、無効であるかテストする。</span>
+    <span class="hljs-keyword">end</span>
+
+    it <span class="hljs-string">&apos;emailは全角文字を使用する場合、無効な状態であること&apos;</span> <span class="hljs-keyword">do</span>
+      <span class="hljs-comment"># emailが全角入力のuserインスタンスを作成して、無効であるかテストする。</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+
+  describe <span class="hljs-string">&apos;password&apos;</span> <span class="hljs-keyword">do</span>
+    <span class="hljs-comment"># shoulda-matchersを使用して、passwordが必須項目であることをテストする。</span>
+    <span class="hljs-comment"># shoulda-matchersを使用して、passwordが6文字以上128文字以内で有効なことをテストする。</span>
+    <span class="hljs-comment"># shoulda-matchersを使用して、password_confirmationが必須項目であることをテストする。</span>
+
+    it <span class="hljs-string">&apos;passwordとpassword_confirmationが不一致の場合、無効な状態であること&apos;</span> <span class="hljs-keyword">do</span>
+    　　<span class="hljs-comment"># passwordの値とpassword_confirmationの値が一致しないuserインスタンスを作成して、無効であるかテストする。</span>
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h5 id="解答例"><a name="解答例" class="plugin-anchor" href="#解答例"><i class="fa fa-link" aria-hidden="true"></i></a>解答例</h5>
 <pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
 
 RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-symbol">:model</span> <span class="hljs-keyword">do</span>
@@ -960,14 +1045,25 @@ RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-sy
   describe <span class="hljs-string">&apos;email&apos;</span> <span class="hljs-keyword">do</span>
     it { is_expected.to validate_presence_of <span class="hljs-symbol">:email</span> }
     it { is_expected.to validate_uniqueness_of(<span class="hljs-symbol">:email</span>).case_insensitive }
+
     it <span class="hljs-string">&apos;emailの形式ではない場合、無効な状態であること&apos;</span> <span class="hljs-keyword">do</span>
-      user = build(<span class="hljs-symbol">:user</span>, <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;example_no_email&apos;</span>)
+    　　　user = User.new(
+      　　<span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+      　　<span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;example_no_email&apos;</span>,   <span class="hljs-comment"># 無効なemailアドレス</span>
+      　　<span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      　　<span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    　　　　)
       user.valid?
       expect(user.errors[<span class="hljs-symbol">:email</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;は不正な値です&quot;</span>) <span class="hljs-comment">#invalid</span>
     <span class="hljs-keyword">end</span>
 
     it <span class="hljs-string">&apos;emailは全角文字を使用する場合、無効な状態であること&apos;</span> <span class="hljs-keyword">do</span>
-      user = build(<span class="hljs-symbol">:user</span>, <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;ｅｘａｐｌｅ@gmail.com&apos;</span>)
+      user = User.new(
+        <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+      　　 <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;ｅｘａｐｌｅ@gmail.com&apos;</span>,   <span class="hljs-comment"># 全角</span>
+      　　 <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      　　 <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    　　　　)
       user.valid?
       expect(user.errors[<span class="hljs-symbol">:email</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;は不正な値です&quot;</span>) <span class="hljs-comment">#invalid</span>
     <span class="hljs-keyword">end</span>
@@ -979,7 +1075,12 @@ RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-sy
     it { is_expected.to validate_presence_of <span class="hljs-symbol">:password_confirmation</span> }
 
     it <span class="hljs-string">&apos;passwordとpassword_confirmationが不一致の場合、無効な状態であること&apos;</span> <span class="hljs-keyword">do</span>
-      user = build(<span class="hljs-symbol">:user</span>, <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;password&apos;</span>, <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;password_confirmation&apos;</span>)
+      user = User.new(
+        <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+      　　 <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;ｅｘａｐｌｅ@gmail.com&apos;</span>,
+      　　 <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;password&apos;</span>,
+      　　 <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;password_confirmation&apos;</span>,  <span class="hljs-comment"># passwordと異なる</span>
+    　　　　)
       user.valid?
       expect(user.errors[<span class="hljs-symbol">:password_confirmation</span>]).to <span class="hljs-keyword">include</span>(<span class="hljs-string">&quot;とパスワードの入力が一致しません&quot;</span>) <span class="hljs-comment">#confirmation</span>
     <span class="hljs-keyword">end</span>
@@ -1297,7 +1398,7 @@ recorded_with: VCR 6.0.0
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"next":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"previous":{"title":"2.RSpecの概要解説","level":"1.3","depth":1,"path":"Section_2.md","ref":"Section_2.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_3.md","mtime":"2022-03-31T07:49:47.211Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-04-05T08:55:12.259Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"next":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"previous":{"title":"2.RSpecの概要解説","level":"1.3","depth":1,"path":"Section_2.md","ref":"Section_2.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_3.md","mtime":"2022-04-10T07:35:11.121Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-04-10T13:32:31.350Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
