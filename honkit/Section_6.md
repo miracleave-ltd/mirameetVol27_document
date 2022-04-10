@@ -158,6 +158,8 @@ RDS_USER : dbuser
 RDS_HOSTNAME : RDSのエンドポイントをコピペ
 RDS_PASSWORD : dbpassword
 RDS_PORT : 3306
+CHANNEL_NAME : testpost
+SLACK_WEBHOOK_URL : https://hooks.slack.com/services/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
 ```
 RDSのエンドポイントは、Amazon RDSサービスで左ペインの「データベース」をクリック、  
 データベース一覧に遷移するので`mirameet-rds`をクリック後、「接続とセキュリティ」タブに記載があります。
