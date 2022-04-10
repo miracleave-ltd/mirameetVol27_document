@@ -109,7 +109,7 @@ mirameetVol27/vpc.yml
 テンプレートは`rds.yml`  
 ファイルパス：  
 ```
-/mirameetVol27/rds.yml
+mirameetVol27/rds.yml
 ```
 「スタックの名前」は`mirameet-27-rds`、パラメータの「PJPrefix」は`mirameet`で作成します。
 
