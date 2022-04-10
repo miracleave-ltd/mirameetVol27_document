@@ -454,13 +454,20 @@ it <span class="hljs-string">&quot;nicknameが10文字以内の場合、有効�
 it <span class="hljs-string">&quot;nicknameが11文字以上の場合、無効であること&quot;</span>
 </code></pre>
 <h5 id="ハンズオン"><a name="ハンズオン" class="plugin-anchor" href="#ハンズオン"><i class="fa fa-link" aria-hidden="true"></i></a>ハンズオン</h5>
-<p>では実際にテストを実装してみましょう。</p>
+<p>では実際にテストを実装してみましょう。
+<code>spec/models/user_sample_1.rb</code>を開いてください。exampleを用意していて、どのように実装すれば良いかコメントしているのでそれを参考に実装してみましょう。</p>
 <pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
 
 RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-symbol">:model</span> <span class="hljs-keyword">do</span>
-  <span class="hljs-comment"># 有効な属性の場合のテスト</span>
-
-  <span class="hljs-comment">## 省略</span>
+  it <span class="hljs-string">&quot;nickname, email, password, password_confirmationがあれば有効であること&quot;</span> <span class="hljs-keyword">do</span>
+    user = User.new(
+      <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>,
+      <span class="hljs-symbol">email:</span> <span class="hljs-string">&apos;tester@example.com&apos;</span>,
+      <span class="hljs-symbol">password:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+      <span class="hljs-symbol">password_confirmation:</span> <span class="hljs-string">&apos;p@ssword!!&apos;</span>,
+    )
+    expect(user).to be_valid
+  <span class="hljs-keyword">end</span>
 
  describe <span class="hljs-string">&apos;nickname&apos;</span> <span class="hljs-keyword">do</span>
   it <span class="hljs-string">&apos;nilの場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
@@ -468,21 +475,21 @@ RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-sy
   <span class="hljs-keyword">end</span>
 
   it <span class="hljs-string">&apos;空文字の場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
-  　　　　<span class="hljs-comment"># nicknameが「&apos;&apos;」のインスタンスを作成して、無効であることをテストする。（無効な場合はエラー文が含まれているかテストする）</span>
+    <span class="hljs-comment"># nicknameが「&apos;&apos;」のインスタンスを作成して、無効であることをテストする。（無効な場合はエラー文が含まれているかテストする）</span>
   <span class="hljs-keyword">end</span>
 
   it <span class="hljs-string">&apos;すでに使用されているnicknameの場合、保存できないこと&apos;</span> <span class="hljs-keyword">do</span>
-  　　　　<span class="hljs-comment"># 最初にuserインスタンスを保存する。</span>
-　　　　　　　　<span class="hljs-comment"># 次に最初に作成したuserインスタンスと同じnicknameを持ったuserインスタンスを新しく作成する。</span>
-　　　　　　　　<span class="hljs-comment"># そのインスタンスが無効であることをテストする。（無効な場合はエラー文が含まれているかテストする）</span>
+    <span class="hljs-comment"># 最初にuserインスタンスを保存する。</span>
+    <span class="hljs-comment"># 次に最初に作成したuserインスタンスと同じnicknameを持ったuserインスタンスを新しく作成する。</span>
+    <span class="hljs-comment"># そのインスタンスが無効であることをテストする。（無効な場合はエラー文が含まれているかテストする）</span>
   <span class="hljs-keyword">end</span>
 
   it <span class="hljs-string">&apos;10文字以内の場合、有効であること&apos;</span> <span class="hljs-keyword">do</span>
-  　　　　<span class="hljs-comment"># nicknameが10文字のuserインスタンスを作成し、有効であるかテストする。</span>
+    <span class="hljs-comment"># nicknameが10文字のuserインスタンスを作成し、有効であるかテストする。</span>
   <span class="hljs-keyword">end</span>
 
   it <span class="hljs-string">&apos;11文字以上の場合、無効であること&apos;</span> <span class="hljs-keyword">do</span>
-  　　　　<span class="hljs-comment"># nicknameが11文字のuserインスタンスを作成し、無効であるかテストする。（無効な場合はエラー文が含まれているかテストする）</span>
+    <span class="hljs-comment"># nicknameが11文字のuserインスタンスを作成し、無効であるかテストする。（無効な場合はエラー文が含まれているかテストする）</span>
   <span class="hljs-keyword">end</span>
  <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
@@ -561,7 +568,7 @@ RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-sy
 </code></pre>
 <p>テストを実行してみます。</p>
 <p><code>ターミナル</code></p>
-<pre><code class="lang-ruby">bundle exec rspec spec/models/user_spec.rb
+<pre><code class="lang-ruby">bundle exec rspec spec/models/user_sample_1_spec.rb
 </code></pre>
 <pre><code class="lang-ruby">User
   nickname
@@ -968,7 +975,8 @@ Userインスタンスは作成できないことを期待していますが、�
 <p>他にもたくさんのマッチャがあるので是非下記を参考にしてみてください。
 <a href="https://github.com/thoughtbot/shoulda-matchers" target="_blank">https://github.com/thoughtbot/shoulda-matchers</a></p>
 <h5 id="ハンズオン"><a name="ハンズオン" class="plugin-anchor" href="#ハンズオン"><i class="fa fa-link" aria-hidden="true"></i></a>ハンズオン</h5>
-<p>では一度ここまでの知識で<code>user_spec.rb</code>をリファクタリングしてみましょう。</p>
+<p>では一度ここまでの知識で<code>user_spec.rb</code>をリファクタリングしてみましょう。
+<code>spec/models/user_sample_2.rb</code>を開いてください。exampleを用意していて、どのように実装すれば良いかコメントしているのでそれを参考に実装してみましょう。</p>
 <pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
 
 RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-symbol">:model</span> <span class="hljs-keyword">do</span>
@@ -1012,7 +1020,7 @@ RSpec.describe User, <span class="hljs-symbol">type:</span> <span class="hljs-sy
     <span class="hljs-comment"># shoulda-matchersを使用して、password_confirmationが必須項目であることをテストする。</span>
 
     it <span class="hljs-string">&apos;passwordとpassword_confirmationが不一致の場合、無効な状態であること&apos;</span> <span class="hljs-keyword">do</span>
-    　　<span class="hljs-comment"># passwordの値とpassword_confirmationの値が一致しないuserインスタンスを作成して、無効であるかテストする。</span>
+      <span class="hljs-comment"># passwordの値とpassword_confirmationの値が一致しないuserインスタンスを作成して、無効であるかテストする。</span>
     <span class="hljs-keyword">end</span>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
@@ -1398,7 +1406,7 @@ recorded_with: VCR 6.0.0
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"next":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"previous":{"title":"2.RSpecの概要解説","level":"1.3","depth":1,"path":"Section_2.md","ref":"Section_2.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_3.md","mtime":"2022-04-10T07:35:11.121Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-04-10T13:32:31.350Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"3.単体テスト(UT)","level":"1.4","depth":1,"next":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"previous":{"title":"2.RSpecの概要解説","level":"1.3","depth":1,"path":"Section_2.md","ref":"Section_2.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_3.md","mtime":"2022-04-10T23:02:07.133Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-04-10T23:07:40.552Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
