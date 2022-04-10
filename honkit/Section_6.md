@@ -41,11 +41,15 @@
       commands: 
     pre_build:   ・・・・ビルドの前に実行するコマンドを設定する。主にnpmパッケージのインストールやgemのインストールなどに使用。
         - echo PRE_BUILD Start
-        - docker-compose -f docker_compose_test.yml build   ・・・　dockerをビルドする。
-    build:   ・・・ビルド時に実行するコマンドを設定する。主にテストを行う。
-      commands:
-        - echo BUILD start
+        - echo PRE_BUILD Start
+        - docker-compose -f docker_compose_test.yml build  ・・・　dockerをビルドする。
         - docker-compose -f docker_compose_test.yml up -d
+        - docker-compose -f docker_compose_test.yml run app rails db:create
+        - docker-compose -f docker_compose_test.yml run app rails db:migrate
+        - docker-compose -f docker_compose_test.yml run app rails assets:precompile
+    build:   ・・・ビルド時に実行するコマンドを設定する。主にテストを行う。
+      commands:†
+        - echo BUILD start
         - docker-compose -f docker_compose_test.yml run app bundle exec rake spec   ・・・テストを実行する。
   ```
 
@@ -148,7 +152,8 @@ https://github.com/miracleave-ltd/mirameetVol27
 
 
 ![スクリーンショット 2022-03-06 22 49 09](https://user-images.githubusercontent.com/52161269/156926221-27c45b16-ee1d-4682-8bb9-90ca5b5aa617.png)
-![スクリーンショット 2022-03-28 15 22 18](https://user-images.githubusercontent.com/52161269/160338195-a1f79fab-597a-47d3-bab3-61a9b99094ce.png)
+![スクリーンショット 2022-04-10 17 16 39](https://user-images.githubusercontent.com/52161269/162609327-dd080fcd-8452-4177-9805-fa6369cfdb31.png)
+
 - VPC・・・事前に作成したVPCを選択
 - サブネット・・・プライベートサブネット(mirameet-private-subnet-a)を選択
 - セキュリティグループ・・・CodeBuild用のセキュリティグループを選択
@@ -159,8 +164,9 @@ RDS_HOSTNAME : RDSのエンドポイントをコピペ
 RDS_PASSWORD : dbpassword
 RDS_PORT : 3306
 CHANNEL_NAME : testpost
-SLACK_WEBHOOK_URL : https://hooks.slack.com/services/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
+SLACK_WEBHOOK_URL : SlackのWebhook URLをコピペ
 ```
+SLACK_WEBHOOK_URLの作成は[こちらを参考に](https://qiita.com/vmmhypervisor/items/18c99624a84df8b31008)作成してください。  
 RDSのエンドポイントは、Amazon RDSサービスで左ペインの「データベース」をクリック、  
 データベース一覧に遷移するので`mirameet-rds`をクリック後、「接続とセキュリティ」タブに記載があります。
 ![スクリーンショット 2022-04-03 22 53 17](https://user-images.githubusercontent.com/52161269/161431378-19a42509-f404-430e-b2c5-cb8c56917985.png)
