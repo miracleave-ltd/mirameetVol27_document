@@ -207,7 +207,8 @@ CloudFormationで作成したサービス（NatGateWayやRDS等）で料金が�
 
 
 ### vpcのスタックの削除
-RDSと同じように「mirameet-27-vpc」を選択して、削除をクリック
+RDSと同じように「mirameet-27-vpc」を選択して、削除をクリック  
+ステータスが`DELETE_COMPLETE`になると削除完了です。
 ![スクリーンショット 2022-04-11 22 56 01](https://user-images.githubusercontent.com/52161269/162755172-0c3fb1ed-10a3-4b63-b77b-4793c4c86ee4.png)
 
 ### RDSのスタックが削除されたかどうか確認
