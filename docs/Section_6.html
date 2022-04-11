@@ -330,7 +330,7 @@
 <p>ステップ４のレビューまで「次へ」をクリックします。<br>ステップ４まできたら下部にある「スタックの作成」をクリックします。<br>作成が完了すると、ステータスは<code>CREATE_COMPLETE</code>になります。
 <img src="https://user-images.githubusercontent.com/52161269/161433375-41bf145a-8d11-4f1c-b4a5-17deced1567a.png" alt="スクリーンショット 2022-04-03 23 40 11"></p>
 <h4 id="RDSのスタック作成">3.1.5. RDSのスタック作成</h4>
-<p>スタックの作成が完了したら、上記と同じ流れでRDSのスタックを作成します。<br>テンプレートは<code>rds.yml</code><br>ファイルパス：  </p>
+<p>スタックの作成が完了したら、上記と同じ流れでRDSのスタックを作成します。（作成には5分ほどかかります。）<br>テンプレートは<code>rds.yml</code><br>ファイルパス：  </p>
 <pre><code>mirameetVol27/rds.yml
 </code></pre><p>「スタックの名前」は<code>mirameet-27-rds</code>、パラメータの「PJPrefix」は<code>mirameet</code>で作成します。</p>
 <hr>
@@ -390,11 +390,30 @@ SLACK_WEBHOOK_URL : SlackのWebhook URLをコピペ
 <p>ログは以下のように出力されます。
 <img src="https://user-images.githubusercontent.com/52161269/161429827-daf0ebaa-8056-4980-b3fa-eaa50d6658ba.png" alt="スクリーンショット 2022-04-03 22 12 54"></p>
 <h2 id="CloudFormationの削除（費用発生を防ぐ為に必ず実施してください）">5. CloudFormationの削除（費用発生を防ぐ為に必ず実施してください）</h2>
-<p>CodeBuildは、ビルド時間によって費用が発生する（従量課金）なので、削除しなくても料金は発生しません。<br>CloudFormationはNatGateWayやRDSで料金が発生する為、削除をお願いします。</p>
-<p>スタックの一覧から、削除対象を選択、削除をクリックすると削除が始まります。
-ステータスが<code>DELETE_COMPLETE</code>になると削除完了です。
-<img src="https://user-images.githubusercontent.com/52161269/161431695-6e47a82a-5a32-470a-9b1b-c10a32d95863.png" alt="スクリーンショット 2022-04-03 23 02 07"></p>
-<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#AWS_CodeBuildでテスト＆ビルドする">AWS CodeBuildでテスト＆ビルドする</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#AWS_CodeBuildの解説">2. AWS CodeBuildの解説</a></li><ul><li><a href="#AWS_CodeBuildの仕組み">2.1. AWS CodeBuildの仕組み</a></li><li><a href="#AWS_CodeBuildの処理の流れ">2.2. AWS CodeBuildの処理の流れ</a></li><li><a href="#buildspec_yml">2.3. buildspec.yml</a></li></ul><li><a href="#ビルドプロジェクトを設定する">3. ビルドプロジェクトを設定する</a></li><ul><li><a href="#今回使用するAWSのアーキテクトの確認">3.1. 今回使用するAWSのアーキテクトの確認</a></li><ul><li><a href="#AWSにログイン___CloudFormationのスタック作成画面に移動">3.1.1. AWSにログイン &amp; CloudFormationのスタック作成画面に移動</a></li><li><a href="#テンプレートの指定">3.1.2. テンプレートの指定</a></li><li><a href="#スタックの詳細設定">3.1.3. スタックの詳細設定</a></li><li><a href="#スタックの作成">3.1.4. スタックの作成</a></li><li><a href="#RDSのスタック作成">3.1.5. RDSのスタック作成</a></li></ul><li><a href="#ビルドプロジェクトの作成">3.2. ビルドプロジェクトの作成</a></li></ul><li><a href="#CodeBuildでビルドを実行する">4. CodeBuildでビルドを実行する</a></li><li><a href="#CloudFormationの削除（費用発生を防ぐ為に必ず実施してください）">5. CloudFormationの削除（費用発生を防ぐ為に必ず実施してください）</a></li></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
+<p>CodeBuildは、ビルド時間によって費用が発生する（従量課金）なので、削除しなくても料金は発生しません。<br>CloudFormationで作成したサービス（NatGateWayやRDS等）で料金が発生する為、削除をお願いします。</p>
+<h3 id="RDSのスタックの削除">5.1. RDSのスタックの削除</h3>
+<p>スタックの一覧から「mirameet-27-rds」を選して、削除をクリック
+<img src="https://user-images.githubusercontent.com/52161269/162753410-d01101db-d11d-4693-839e-cedfd3c6aced.png" alt="スクリーンショット 2022-04-11 22 42 27">
+<img src="https://user-images.githubusercontent.com/52161269/162753762-f9b81b35-19ff-4c4a-80e4-c1f9468d13c3.png" alt="スクリーンショット 2022-04-11 22 48 02"></p>
+<p>ステータスが<code>DELETE_COMPLETE</code>になると削除完了です。
+<img src="https://user-images.githubusercontent.com/52161269/162755518-70808ecf-d857-44c3-9edf-aaf85b2f9165.png" alt="スクリーンショット 2022-04-11 22 52 31"></p>
+<h3 id="vpcのスタックの削除">5.2. vpcのスタックの削除</h3>
+<p>RDSと同じように「mirameet-27-vpc」を選択して、削除をクリック<br>ステータスが<code>DELETE_COMPLETE</code>になると削除完了です。
+<img src="https://user-images.githubusercontent.com/52161269/162755172-0c3fb1ed-10a3-4b63-b77b-4793c4c86ee4.png" alt="スクリーンショット 2022-04-11 22 56 01"></p>
+<h3 id="RDSのスタックが削除されたかどうか確認">5.3. RDSのスタックが削除されたかどうか確認</h3>
+<p>RDSのデータベース一覧に遷移する  </p>
+<p><img src="https://user-images.githubusercontent.com/52161269/162761117-c1d75d7a-4a84-4bd4-8844-c99d15640b6f.png" alt="スクリーンショット 2022-04-11 23 24 49">
+<img src="https://user-images.githubusercontent.com/52161269/162761459-10615d7d-544c-4add-be4a-695a30938de5.png" alt="スクリーンショット 2022-04-11 23 26 58"></p>
+<p>「インスタンスが存在しません」とあれば、ちゃんと削除されています。
+<img src="https://user-images.githubusercontent.com/52161269/162756901-9821b9cc-3ae2-43a7-8f7e-50e9d27d546f.png" alt="スクリーンショット 2022-04-11 23 04 25"></p>
+<h3 id="vpcのスタックが削除されたかどうか確認">5.4. vpcのスタックが削除されたかどうか確認</h3>
+<p>vpcサービスへ遷移  </p>
+<p><img src="https://user-images.githubusercontent.com/52161269/162760780-52ca664d-d0f6-48a8-af78-4b97eb2c2f05.png" alt="スクリーンショット 2022-04-11 23 22 42"></p>
+<p>Elastic IPの確認
+<img src="https://user-images.githubusercontent.com/52161269/162758533-73a091e5-44c9-4a65-855c-0c5ffab7ba7f.png" alt="スクリーンショット 2022-04-11 23 11 21"></p>
+<p>NATゲートウェイの確認
+<img src="https://user-images.githubusercontent.com/52161269/162760009-c3778a2f-e0db-4faa-8bc8-b72d9874b42b.png" alt="スクリーンショット 2022-04-11 23 14 58"></p>
+<div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#AWS_CodeBuildでテスト＆ビルドする">AWS CodeBuildでテスト＆ビルドする</a></p><li><a href="#本セクションで行うこと">1. 本セクションで行うこと</a></li><li><a href="#AWS_CodeBuildの解説">2. AWS CodeBuildの解説</a></li><ul><li><a href="#AWS_CodeBuildの仕組み">2.1. AWS CodeBuildの仕組み</a></li><li><a href="#AWS_CodeBuildの処理の流れ">2.2. AWS CodeBuildの処理の流れ</a></li><li><a href="#buildspec_yml">2.3. buildspec.yml</a></li></ul><li><a href="#ビルドプロジェクトを設定する">3. ビルドプロジェクトを設定する</a></li><ul><li><a href="#今回使用するAWSのアーキテクトの確認">3.1. 今回使用するAWSのアーキテクトの確認</a></li><ul><li><a href="#AWSにログイン___CloudFormationのスタック作成画面に移動">3.1.1. AWSにログイン &amp; CloudFormationのスタック作成画面に移動</a></li><li><a href="#テンプレートの指定">3.1.2. テンプレートの指定</a></li><li><a href="#スタックの詳細設定">3.1.3. スタックの詳細設定</a></li><li><a href="#スタックの作成">3.1.4. スタックの作成</a></li><li><a href="#RDSのスタック作成">3.1.5. RDSのスタック作成</a></li></ul><li><a href="#ビルドプロジェクトの作成">3.2. ビルドプロジェクトの作成</a></li></ul><li><a href="#CodeBuildでビルドを実行する">4. CodeBuildでビルドを実行する</a></li><li><a href="#CloudFormationの削除（費用発生を防ぐ為に必ず実施してください）">5. CloudFormationの削除（費用発生を防ぐ為に必ず実施してください）</a></li><ul><li><a href="#RDSのスタックの削除">5.1. RDSのスタックの削除</a></li><li><a href="#vpcのスタックの削除">5.2. vpcのスタックの削除</a></li><li><a href="#RDSのスタックが削除されたかどうか確認">5.3. RDSのスタックが削除されたかどうか確認</a></li><li><a href="#vpcのスタックが削除されたかどうか確認">5.4. vpcのスタックが削除されたかどうか確認</a></li></ul></ul></div><a href="#本セクションで行うこと" id="goTop"><i class="fa fa-arrow-up"></i></a>
                                 
                                 </section>
                             
@@ -437,7 +456,7 @@ SLACK_WEBHOOK_URL : SlackのWebhook URLをコピペ
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"next":{"title":"7.まとめ","level":"1.8","depth":1,"path":"Section_7.md","ref":"Section_7.md","articles":[]},"previous":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_6.md","mtime":"2022-04-10T23:02:07.133Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-04-10T23:07:40.552Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"next":{"title":"7.まとめ","level":"1.8","depth":1,"path":"Section_7.md","ref":"Section_7.md","articles":[]},"previous":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"path":"Section_5.md","ref":"Section_5.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_6.md","mtime":"2022-04-11T14:33:09.319Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-04-11T14:33:23.386Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
