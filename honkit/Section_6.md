@@ -109,7 +109,7 @@ mirameetVol27/vpc.yml
 
 
 #### RDSのスタック作成
-スタックの作成が完了したら、上記と同じ流れでRDSのスタックを作成します。  
+スタックの作成が完了したら、上記と同じ流れでRDSのスタックを作成します。（作成には5分ほどかかります。）  
 テンプレートは`rds.yml`  
 ファイルパス：  
 ```
@@ -195,16 +195,43 @@ RDSのエンドポイントは、Amazon RDSサービスで左ペインの「デ�
 
 ## CloudFormationの削除（費用発生を防ぐ為に必ず実施してください）
 CodeBuildは、ビルド時間によって費用が発生する（従量課金）なので、削除しなくても料金は発生しません。  
-CloudFormationはNatGateWayやRDSで料金が発生する為、削除をお願いします。
+CloudFormationで作成したサービス（NatGateWayやRDS等）で料金が発生する為、削除をお願いします。
 
-スタックの一覧から、削除対象を選択、削除をクリックすると削除が始まります。
+### RDSのスタックの削除
+スタックの一覧から「mirameet-27-rds」を選して、削除をクリック
+![スクリーンショット 2022-04-11 22 42 27](https://user-images.githubusercontent.com/52161269/162753410-d01101db-d11d-4693-839e-cedfd3c6aced.png)
+![スクリーンショット 2022-04-11 22 48 02](https://user-images.githubusercontent.com/52161269/162753762-f9b81b35-19ff-4c4a-80e4-c1f9468d13c3.png)
+
 ステータスが`DELETE_COMPLETE`になると削除完了です。
-![スクリーンショット 2022-04-03 23 02 07](https://user-images.githubusercontent.com/52161269/161431695-6e47a82a-5a32-470a-9b1b-c10a32d95863.png)
+![スクリーンショット 2022-04-11 22 52 31](https://user-images.githubusercontent.com/52161269/162755518-70808ecf-d857-44c3-9edf-aaf85b2f9165.png)
 
 
+### vpcのスタックの削除
+RDSと同じように「mirameet-27-vpc」を選択して、削除をクリック
+![スクリーンショット 2022-04-11 22 56 01](https://user-images.githubusercontent.com/52161269/162755172-0c3fb1ed-10a3-4b63-b77b-4793c4c86ee4.png)
+
+### RDSのスタックが削除されたかどうか確認
+
+RDSのデータベース一覧に遷移する  
+
+![スクリーンショット 2022-04-11 23 24 49](https://user-images.githubusercontent.com/52161269/162761117-c1d75d7a-4a84-4bd4-8844-c99d15640b6f.png)
+![スクリーンショット 2022-04-11 23 26 58](https://user-images.githubusercontent.com/52161269/162761459-10615d7d-544c-4add-be4a-695a30938de5.png)
 
 
+「インスタンスが存在しません」とあれば、ちゃんと削除されています。
+![スクリーンショット 2022-04-11 23 04 25](https://user-images.githubusercontent.com/52161269/162756901-9821b9cc-3ae2-43a7-8f7e-50e9d27d546f.png)
+
+### vpcのスタックが削除されたかどうか確認
+vpcサービスへ遷移  
+
+![スクリーンショット 2022-04-11 23 22 42](https://user-images.githubusercontent.com/52161269/162760780-52ca664d-d0f6-48a8-af78-4b97eb2c2f05.png)
 
 
+Elastic IPの確認
+![スクリーンショット 2022-04-11 23 11 21](https://user-images.githubusercontent.com/52161269/162758533-73a091e5-44c9-4a65-855c-0c5ffab7ba7f.png)
+
+
+NATゲートウェイの確認
+![スクリーンショット 2022-04-11 23 14 58](https://user-images.githubusercontent.com/52161269/162760009-c3778a2f-e0db-4faa-8bc8-b72d9874b42b.png)
 
 
