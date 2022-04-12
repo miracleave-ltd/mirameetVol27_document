@@ -46,7 +46,7 @@ rails g rspec:request ファイル名
 
 投稿機能の結合テスト(posts_spec.rb)を例に実際のテストコードを確認していきます。  
 
-```
+```ruby
 require 'rails_helper'
 
 RSpec.describe 'Posts', type: :request do
@@ -97,7 +97,7 @@ RSpec.describe 'Posts', type: :request do
 `return_response_status`は、同じテストコードの重複を避けるために`shared_examples`を使ってまとめています。  
 中身のテストコードは、別ファイルで定義しています。  
 `mirameetVol27/spec/support/examples/return_response_status.rb`  
-```
+```ruby
 RSpec.shared_examples 'return_response_status' do |status_no|
   it "#{status_no}レスポンスを返すこと" do
     subject
@@ -107,7 +107,7 @@ end
 ```
 
 `shared_examples`なしのコード：
-```
+```ruby
 context 'behaves like a return_response_status' do
     it "200レスポンスを返すこと" do
         expect(response.status).to eq 200
@@ -118,7 +118,7 @@ end
 ***
 ##### 3.2 投稿一覧のレスポンスに適切な投稿内容を含んでいること
 
-```
+```ruby
 require 'rails_helper'
 
 RSpec.describe 'Posts', type: :request do

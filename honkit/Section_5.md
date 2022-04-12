@@ -39,7 +39,7 @@ Capybaraは、指定したページにアクセスしたり、フィールドに
 
 先ほどの投稿機能のシステムテストケースを使って、実際のコードを確認していきましょう！
 
-```
+```ruby
 require 'rails_helper'
 
 RSpec.feature 'Posts', type: :system do

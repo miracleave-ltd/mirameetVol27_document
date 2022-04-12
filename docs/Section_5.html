@@ -279,50 +279,51 @@
 <p>RSpecでは、システムテストとして行うテストをSystem specと呼んでいます。
 System specでは、ユーザーの動きをコードに起こしてテストする為に、「Capybara」と言うgem(ライブラリ）を使います。<br>Capybaraは、Rails5.1以降では標準インストールされています。<br>Capybaraは、指定したページにアクセスしたり、フィールドに入力したり、ボタンをクリックしたり、ブラウザの操作を可能にします。</p>
 <p>先ほどの投稿機能のシステムテストケースを使って、実際のコードを確認していきましょう！</p>
-<pre><code>require &apos;rails_helper&apos;
+<pre><code class="lang-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">&apos;rails_helper&apos;</span>
 
-RSpec.feature &apos;Posts&apos;, type: :system do
-  background do
-    driven_by(:rack_test)
-  end
+RSpec.feature <span class="hljs-string">&apos;Posts&apos;</span>, <span class="hljs-symbol">type:</span> <span class="hljs-symbol">:system</span> <span class="hljs-keyword">do</span>
+  background <span class="hljs-keyword">do</span>
+    driven_by(<span class="hljs-symbol">:rack_test</span>)
+  <span class="hljs-keyword">end</span>
 ~~~~~~~~~~~①~~~~~~~~~~~~
-  let(:user_a) { create(:user, nickname: &apos;Takashi&apos;) }
+  let(<span class="hljs-symbol">:user_a</span>) { create(<span class="hljs-symbol">:user</span>, <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Takashi&apos;</span>) }
 ~~~~~~~~~~~①~~~~~~~~~~~~
-  let(:user_b) { create(:user, nickname: &apos;Satoshi&apos;) }
-  let!(:post) { create(:post, text: &apos;hello world&apos;, user: user_a)}
+  let(<span class="hljs-symbol">:user_b</span>) { create(<span class="hljs-symbol">:user</span>, <span class="hljs-symbol">nickname:</span> <span class="hljs-string">&apos;Satoshi&apos;</span>) }
+  let!(<span class="hljs-symbol">:post</span>) { create(<span class="hljs-symbol">:post</span>, <span class="hljs-symbol">text:</span> <span class="hljs-string">&apos;hello world&apos;</span>, <span class="hljs-symbol">user:</span> user_a)}
 ~~~~~~~~~~~②~~~~~~~~~~~~
-  before do
+  before <span class="hljs-keyword">do</span>
     sign_in_as user_a
-  end
+  <span class="hljs-keyword">end</span>
 ~~~~~~~~~~~②~~~~~~~~~~~~
 
-  describe &apos;投稿の作成&apos; do
-    scenario &apos;ユーザーは新しい投稿を作成する&apos; do
-      ActiveJob::Base.queue_adapter = :test
+  describe <span class="hljs-string">&apos;投稿の作成&apos;</span> <span class="hljs-keyword">do</span>
+    scenario <span class="hljs-string">&apos;ユーザーは新しい投稿を作成する&apos;</span> <span class="hljs-keyword">do</span>
+      ActiveJob::Base.queue_adapter = <span class="hljs-symbol">:test</span>
 
       expect {
 ~~~~~~~~~~~③~~~~~~~~~~~~
-        click_link_or_button &apos;投稿する&apos;
-        fill_in &apos;post_text&apos;, with: &apos;sample_text&apos;
-        click_button &apos;commit&apos;
+        click_link_or_button <span class="hljs-string">&apos;投稿する&apos;</span>
+        fill_in <span class="hljs-string">&apos;post_text&apos;</span>, <span class="hljs-symbol">with:</span> <span class="hljs-string">&apos;sample_text&apos;</span>
+        click_button <span class="hljs-string">&apos;commit&apos;</span>
 
-        post = Post.find_by_text_and_user_id(&apos;sample_text :Takashiの投稿&apos;, user_a.id)
+        post = Post.find_by_text_and_user_id(<span class="hljs-string">&apos;sample_text :Takashiの投稿&apos;</span>, user_a.id)
 ~~~~~~~~~~~③~~~~~~~~~~~~
 
 ~~~~~~~~~~~④~~~~~~~~~~~~
-        aggregate_failures do
+        aggregate_failures <span class="hljs-keyword">do</span>
           expect(current_path).to eq posts_path
-          expect(page).to have_content &apos;sample_text&apos;
+          expect(page).to have_content <span class="hljs-string">&apos;sample_text&apos;</span>
           expect {
             SlackSyncJob.perform_later(post)
           }.to have_enqueued_job.with(post)
-        end
+        <span class="hljs-keyword">end</span>
 ~~~~~~~~~~~④~~~~~~~~~~~~
-      }.to change(user_a.posts, :count).by(1)
-    end
+      }.to change(user_a.posts, <span class="hljs-symbol">:count</span>).by(<span class="hljs-number">1</span>)
+    <span class="hljs-keyword">end</span>
 
 ~~以下省略~~
-</code></pre><h5 id="3_1__ユーザーは投稿する"><a name="31-ユーザーは投稿する" class="plugin-anchor" href="#31-ユーザーは投稿する"><i class="fa fa-link" aria-hidden="true"></i></a>3.1. ユーザーは投稿する</h5>
+</code></pre>
+<h5 id="3_1__ユーザーは投稿する"><a name="31-ユーザーは投稿する" class="plugin-anchor" href="#31-ユーザーは投稿する"><i class="fa fa-link" aria-hidden="true"></i></a>3.1. ユーザーは投稿する</h5>
 <p>①投稿する為にユーザーを定義</p>
 <p>②テスト実施前に、ユーザーのログイン処理を行う</p>
 <p>③テスト対象は<code>ユーザーは投稿する</code>なので、Capybaraのメソッドでブラウザ操作して投稿処理をする  </p>
@@ -376,7 +377,7 @@ RSpec.feature &apos;Posts&apos;, type: :system do
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"next":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"path":"Section_6.md","ref":"Section_6.md","articles":[]},"previous":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_5.md","mtime":"2022-04-03T14:24:22.824Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-04-11T14:33:23.386Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"5.システムテスト(ST)","level":"1.6","depth":1,"next":{"title":"6.AWS CodeBuildでビルドを実行しみよう！","level":"1.7","depth":1,"path":"Section_6.md","ref":"Section_6.md","articles":[]},"previous":{"title":"4.結合テスト(IT)","level":"1.5","depth":1,"path":"Section_4.md","ref":"Section_4.md","articles":[]},"dir":"ltr"},"config":{"plugins":["search-pro-fixed","-lunr","-search","hide-published-with","anchors","navigator","collapsible-chapters","hints","copy-code-button","custom-favicon","insert-logo"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"collapsible-chapters":{},"hints":{"info":"fa fa-info-circle","tip":"fa fa-mortar-board","danger":"fa fa-exclamation-circle","working":"fa fa-wrench"},"search-pro-fixed":{},"hide-published-with":{},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"favicon":"./img/miracleave.ico","navigator":{},"custom-favicon":{},"copy-code-button":{},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{},"insert-logo":{"url":"./img/miracleave.png","style":"background: none; width: 100%;"}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"mirameet","language":"ja","gitbook":"*"},"file":{"path":"Section_5.md","mtime":"2022-04-12T11:40:52.446Z","type":"markdown"},"gitbook":{"version":"3.7.1","time":"2022-04-12T11:41:16.697Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
